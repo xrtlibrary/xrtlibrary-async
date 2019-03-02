@@ -29,22 +29,22 @@ var XRTLibAsync = require("./../../../");
         console.log("Thread 1 started.");
         var i = 0;
         var counter = 1;
-        XRTLibAsync.Asynchronize.Loop.RunAsynchronousLoop(function() {
-            return XRTLibAsync.Asynchronize.Waterfall.CreateWaterfallPromise([
-                function() {
-                    if (i >= 5) {
-                        return Promise.reject(null);
+        XRTLibAsync.Asynchronize.Loop.RunAsynchronousForNext(
+            function() { return i < 5; },
+            function() { ++i; },
+            function() {
+                return XRTLibAsync.Asynchronize.Waterfall.CreateWaterfallPromise([
+                    function() {
+                        return sem1.wait();
+                    },
+                    function() {
+                        console.log("Thread 1: " + (counter++).toString() + ".");
+                        sem2.signal();
+                        return Promise.resolve();
                     }
-                    ++i;
-                    return sem1.wait();
-                },
-                function() {
-                    console.log("Thread 1: " + (counter++).toString() + ".");
-                    sem2.signal();
-                    return Promise.resolve();
-                }
-            ]);
-        }).catch(function() {
+                ]);
+            }
+        ).then(function() {
             console.log("Thread 1 exited.");
         });
     }, Math.random() * 1000);
@@ -54,21 +54,22 @@ var XRTLibAsync = require("./../../../");
         console.log("Thread 2 started.");
         var i = 0;
         var counter = 1;
-        XRTLibAsync.Asynchronize.Loop.RunAsynchronousLoop(function() {
-            return XRTLibAsync.Asynchronize.Waterfall.CreateWaterfallPromise([
-                function() {
-                    if (i >= 5) {
-                        return Promise.reject(null);
+        XRTLibAsync.Asynchronize.Loop.RunAsynchronousForNext(
+            function() { return i < 5; },
+            function() { ++i; },
+            function() {
+                return XRTLibAsync.Asynchronize.Waterfall.CreateWaterfallPromise([
+                    function() {
+                        sem1.signal();
+                        return sem2.wait();
+                    },
+                    function() {
+                        console.log("Thread 2: " + (counter++).toString() + ".");
+                        return Promise.resolve();
                     }
-                    ++i;
-                    sem1.signal();
-                    return sem2.wait();
-                },
-                function() {
-                    console.log("Thread 2: " + (counter++).toString() + ".");
-                }
-            ]);
-        }).catch(function() {
+                ]);
+            }
+        ).then(function() {
             console.log("Thread 2 exited.");
         });
     }, Math.random() * 1000);

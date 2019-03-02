@@ -24,7 +24,9 @@ var CrSyncSemaphore = require("./../core/synchronize/semaphore");
 module.exports = {
     "Asynchronize": {
         "Loop": {
-            "RunAsynchronousLoop": CrAsyncLoop.RunAsynchronousLoop
+            "RunAsynchronousLoop": CrAsyncLoop.RunAsynchronousLoop,
+            "RunAsynchronousForNext": CrAsyncLoop.RunAsynchronousForNext,
+            "RunAsynchronousDoWhile": CrAsyncLoop.RunAsynchronousDoWhile
         },
         "Preempt": {
             "PreemptResolve": CrAsyncPreempt.PreemptResolve,
