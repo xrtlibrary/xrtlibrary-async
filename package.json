@@ -1,0 +1,14 @@
+{
+  "name": "xrtlibrary-async",
+  "version": "1.0.1",
+  "description": "Asynchronous helpers module of XRT library.",
+  "main": "library/api.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "The XRT Authors.",
+  "license": "BSD-3-Clause",
+  "dependencies": {
+    "xrtlibrary-timer": "^1.0.4"
+  }
+}
