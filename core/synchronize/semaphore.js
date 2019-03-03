@@ -83,18 +83,21 @@ function SemaphoreSynchronizer(initialCount) {
         return new Promise(function(resolve, reject) {
             var cts = new CrSyncConditional.ConditionalSynchronizer();
             var ctx = {
-                "resolver": function() {
+                "resolver": function(value) {
                     cts.fullfill();
-                    resolve();
+                    resolve(value);
                 },
-                "rejector": reject,
+                "rejector": function(reason) {
+                    cts.fullfill();
+                    reject(reason);
+                },
                 "cancellator": cancellator,
                 "managed": false
             };
             queue.put(ctx);
             cancellator.waitWithCancellator(cts).then(function() {
                 if (!ctx.managed) {
-                    reject();
+                    reject("The cancellator was activated.");
                 }
             }).catch(function() {
                 //  Do nothing.
@@ -153,7 +156,6 @@ function SemaphoreSynchronizer(initialCount) {
     
                     //  Ignore this context if it was cancelled.
                     if (ctx.cancellator.isFullfilled()) {
-                        ctx.rejector();
                         return Promise.reject(null);
                     }
 
@@ -174,7 +176,7 @@ function SemaphoreSynchronizer(initialCount) {
                                     semHoldAck();
                                 } else if (wh == wh2) {
                                     self.signal();
-                                    ctx.rejector();
+                                    ctx.rejector(new Error("The cancellator was activated."));
                                     semHoldReject(null);
                                 } else {
                                     semHoldReject(new Error("Invalid wait handler."));
