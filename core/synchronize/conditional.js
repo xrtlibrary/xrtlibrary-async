@@ -137,6 +137,20 @@ function ConditionalSynchronizer() {
     this.isFullfilled = function() {
         return fullfilled;
     };
+
+    /**
+     *  Get the fullfilled data.
+     * 
+     *  @return {T} - The data (throw an error if not fullfilled).
+     */
+    this.getFullfilledData = function() {
+        //  Check fullfilled.
+        if (!fullfilled) {
+            throw new Error("Not fullfilled yet.");
+        }
+
+        return fullfillData;
+    };
 }
 
 /**
@@ -146,24 +160,7 @@ function ConditionalSynchronizer() {
  *  @return {Promise<Array>} - The promise object.
  */
 ConditionalSynchronizer.waitAll = function(synchronizers) {
-    if (synchronizers.length == 0) {
-        return Promise.resolve([]);
-    }
-    return new Promise(function(resolve) {
-        var current = 0;
-        var values = [];
-        function _Next() {
-            synchronizers[current].wait().then(function(value) {
-                values.push(value);
-                if (++current >= synchronizers.length) {
-                    resolve(values);
-                } else {
-                    _Next();
-                }
-            });
-        }
-        _Next();
-    });
+    return ConditionalSynchronizer.waitAllWithCancellator(synchronizers, new ConditionalSynchronizer());
 };
 
 /**
@@ -191,10 +188,10 @@ ConditionalSynchronizer.waitAllWithCancellator = function(synchronizers, cancell
                 cts.fullfill();
                 var wh = rsv.getPromiseObject();
                 if (wh == wh1) {
+                    values.push(rsv.getValue());
                     if (++current >= synchronizers.length) {
                         resolve(values);
                     } else {
-                        values.push(rsv.getValue());
                         _Next();
                     }
                 } else if (wh == wh2) {
