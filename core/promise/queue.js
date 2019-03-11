@@ -10,12 +10,14 @@
 
 //  Imported modules.
 var CrPromiseWrapper = require("./wrapper");
+var CrSyncConditional = require("./../synchronize/conditional");
 var Events = require("events");
 var Util = require("util");
 
 //  Imported classes.
 var PromiseWrapper = CrPromiseWrapper.PromiseWrapper;
 var EventEmitter = Events.EventEmitter;
+var ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
 
 //
 //  Constants.
@@ -65,6 +67,9 @@ function PromiseQueue() {
      */
     var pending = [];
 
+    //  Synchronizers.
+    var syncHasPendingItem = new ConditionalSynchronizer();
+
     //
     //  Public methods.
     //
@@ -82,6 +87,7 @@ function PromiseQueue() {
             self.emit("change", PROMISEQUEUEOP_POP, item);
         } else {
             pending.push(item);
+            syncHasPendingItem.fullfill();
         }
     };
 
@@ -96,6 +102,9 @@ function PromiseQueue() {
                 var item = pending.shift();
                 resolve(item);
                 self.emit("change", PROMISEQUEUEOP_POP, item);
+                if (pending.length == 0) {
+                    syncHasPendingItem.unfullfill();
+                }
             } else {
                 waiting.push(new PromiseWrapper(resolve, reject));
             }
@@ -112,6 +121,19 @@ function PromiseQueue() {
     };
 
     /**
+     *  Wait for an item to be available.
+     * 
+     *  @param {ConditionalSynchronizer} [cancellator] - The cancellator.
+     *  @return {Promise} - The promise object (resolves when available, rejects when cancelled).
+     */
+    this.wait = function(cancellator) {
+        if (!(cancellator instanceof ConditionalSynchronizer)) {
+            cancellator = new ConditionalSynchronizer();
+        }
+        return syncHasPendingItem.waitWithCancellator(cancellator);
+    };
+
+    /**
      *  Clear all in-queue items.
      */
     this.clear = function() {
@@ -119,6 +141,7 @@ function PromiseQueue() {
             var item = pending.shift();
             self.emit("change", PROMISEQUEUEOP_POP, item);
         }
+        syncHasPendingItem.unfullfill();
     };
 }
 
