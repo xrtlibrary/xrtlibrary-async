@@ -112,6 +112,27 @@ function PromiseQueue() {
     };
 
     /**
+     *  Get an item from the queue synchronously.
+     * 
+     *  Note(s):
+     *    [1] An error will be thrown if the queue has no item.
+     * 
+     *  @return {T} - The item.
+     */
+    this.getSync = function() {
+        if (pending.length != 0) {
+            var item = pending.shift();
+            self.emit("change", PROMISEQUEUEOP_POP, item);
+            if (pending.length == 0) {
+                syncHasPendingItem.unfullfill();
+            }
+            return item;
+        } else {
+            throw new Error("No item yet.");
+        }
+    };
+
+    /**
      *  Get the count of in-queue items (queue length).
      * 
      *  @return {Number} - The item count.
