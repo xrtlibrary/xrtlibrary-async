@@ -84,18 +84,18 @@ function CreatePreemptivePromise(tasks) {
         for (var i = 0; i < tasks.length; ++i) {
             (function(_i) {
                 var task = tasks[_i];
-                task.then(function(_value) {
+                task.then(function(value) {
                     if (preempted) {
                         return;
                     }
                     preempted = true;
-                    resolve(new PreemptResolve(_value, task));
-                }, function(_error) {
+                    resolve(new PreemptResolve(value, task));
+                }, function(reason) {
                     if (preempted) {
                         return;
                     }
                     preempted = true;
-                    reject(new PreemptReject(_error, task));
+                    reject(new PreemptReject(reason, task));
                 });
             })(i);
         }

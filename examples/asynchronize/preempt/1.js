@@ -17,7 +17,7 @@ var XRTLibAsync = require("./../../../");
 (function() {
     var tasks = [];
     for (var i = 0; i < 5; ++i) {
-        tasks.push(XRTLibAsync.Asynchronize.Timeout.CreateTimeoutPromise(Math.random(), i));
+        tasks.push(XRTLibAsync.Asynchronize.Timeout.CreateTimeoutPromise(Math.random() * 1000, i));
     }
     XRTLibAsync.Asynchronize.Preempt.CreatePreemptivePromise(tasks).then(function(preempted) {
         console.log("Task " + preempted.getValue().toString() + " preempted.");

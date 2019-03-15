@@ -44,6 +44,11 @@ function CreateTimeoutPromise(timespan, value) {
  *  @return {Promise} - The promise object (reject when cancelled).
  */
 async function CreateTimeoutPromiseEx(timespan, cancellator, value) {
+    //  Check the cancellator.
+    if (cancellator.isFullfilled()) {
+        throw new Error("The cancellator was already activated.");
+    }
+
     //  Create a timer.
     var timerSync = new ConditionalSynchronizer();
     var timer = XRTLibTimer.SetTimeout(function() {

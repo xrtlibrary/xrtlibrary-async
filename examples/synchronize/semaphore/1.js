@@ -25,52 +25,24 @@ var XRTLibAsync = require("./../../../");
     var sem2 = new XRTLibAsync.Synchronize.Semaphore.SemaphoreSynchronizer(0);
 
     //  Thread 1.
-    setTimeout(function() {
+    setTimeout(async function() {
         console.log("Thread 1 started.");
-        var i = 0;
-        var counter = 1;
-        XRTLibAsync.Asynchronize.Loop.RunAsynchronousForNext(
-            function() { return i < 5; },
-            function() { ++i; },
-            function() {
-                return XRTLibAsync.Asynchronize.Waterfall.CreateWaterfallPromise([
-                    function() {
-                        return sem1.wait();
-                    },
-                    function() {
-                        console.log("Thread 1: " + (counter++).toString() + ".");
-                        sem2.signal();
-                        return Promise.resolve();
-                    }
-                ]);
-            }
-        ).then(function() {
-            console.log("Thread 1 exited.");
-        });
+        for (var i = 1; i <= 5; ++i) {
+            await sem1.wait();
+            console.log("Thread 1: " + i.toString() + ".");
+            sem2.signal();
+        }
+        console.log("Thread 1 exited.");
     }, Math.random() * 1000);
 
     //  Thread 2.
-    setTimeout(function() {
+    setTimeout(async function() {
         console.log("Thread 2 started.");
-        var i = 0;
-        var counter = 1;
-        XRTLibAsync.Asynchronize.Loop.RunAsynchronousForNext(
-            function() { return i < 5; },
-            function() { ++i; },
-            function() {
-                return XRTLibAsync.Asynchronize.Waterfall.CreateWaterfallPromise([
-                    function() {
-                        sem1.signal();
-                        return sem2.wait();
-                    },
-                    function() {
-                        console.log("Thread 2: " + (counter++).toString() + ".");
-                        return Promise.resolve();
-                    }
-                ]);
-            }
-        ).then(function() {
-            console.log("Thread 2 exited.");
-        });
+        for (var i = 1; i <= 5; ++i) {
+            sem1.signal();
+            await sem2.wait();
+            console.log("Thread 2: " + i.toString() + ".");
+        }
+        console.log("Thread 2 exited.");
     }, Math.random() * 1000);
 })();

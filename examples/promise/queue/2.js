@@ -21,7 +21,8 @@ var XRTLibAsync = require("./../../../");
     //  Read the queue asynchronously.
     (async function() {
         while(true) {
-            var item = await queue.get();
+            await queue.wait();
+            var item = queue.getSync();
             if (item !== null) {
                 console.log(item);
             } else {

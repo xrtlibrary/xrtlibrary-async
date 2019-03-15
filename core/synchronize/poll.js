@@ -30,7 +30,11 @@ var ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
  *  @return {Promise} - The promise object.
  */
 function PollFor(detector, delayMin, delayMax, delayIncreaseRatio, cancellator) {
-    return PollForEx(detector, null, delayMin, delayMax, delayIncreaseRatio, cancellator);
+    if (arguments.length > 4) {
+        return PollForEx(detector, null, delayMin, delayMax, delayIncreaseRatio, cancellator);
+    } else {
+        return PollForEx(detector, null, delayMin, delayMax, delayIncreaseRatio);
+    }
 }
 
 /**
@@ -46,17 +50,17 @@ function PollFor(detector, delayMin, delayMax, delayIncreaseRatio, cancellator) 
  *  @return {Promise<T>} - The promise object.
  */
 async function PollForEx(detector, resvData, delayMin, delayMax, delayIncreaseRatio, cancellator) {
-    //  Create a cancellator if not set.
-    if (!(cancellator instanceof ConditionalSynchronizer)) {
+    if (arguments.length > 5) {
+        //  Check the initial state of the cancellator.
+        if (cancellator.isFullfilled()) {
+            throw new Error("The cancellator was already activated.");
+        }
+    } else {
+        //  Create a cancellator if not set.
         cancellator = new ConditionalSynchronizer();
     }
 
-    //  Check the initial state of the cancellator.
-    if (cancellator.isFullfilled()) {
-        throw new Error("The cancellator was already activated.");
-    }
-
-    //  Configure the initial delay..
+    //  Configure the initial delay.
     var delay = delayMin;
 
     //  Wait.

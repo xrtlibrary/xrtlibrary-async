@@ -5,6 +5,15 @@
 //
 
 //
+//  Warning(s):
+//    [1] This module has been deprecated.
+//    [2] The existence of this module is ONLY for compatible. You shall NOT 
+//        use any API of this module in new application.
+//    [3] Use JavaScript's native async/await mechanism to replace this mod-
+//        ule.
+//
+
+//
 //  Public functions.
 //
 
@@ -16,53 +25,22 @@
  *  @param {Boolean} [strictMode] - True if a task function must return with a Promise object.
  *  @return {Promise} - The waterfall promise (resolve with the the value of the lastest task).
  */
-function CreateWaterfallPromise(tasks, strictMode) {
-    //  No need to deal with anything if there's no task.
-    if (tasks.length == 0) {
-        return Promise.resolve();
-    }
-
-    //  Reset current task index.
-    var current = 0;
-
-    //  Previous task result.
-    var previousResult = null;
-
-    return new Promise(function(_resolve, _reject) {
-        /**
-         *  Execute current task.
-         */
-        function _ExecuteCurrentTask() {
-            var task = tasks[current](previousResult);
-            if (!strictMode) {
-                if (typeof(task) == "undefined" || task === null) {
-                    task = Promise.resolve();
-                }
+async function CreateWaterfallPromise(tasks, strictMode) {
+    var lastest = undefined;
+    for (var i = 0; i < tasks.length; ++i) {
+        var task = tasks[i](lastest);
+        if (!strictMode) {
+            if (typeof(task) == "undefined" || task === null) {
+                lastest = undefined;
+                continue;
             }
-            if (!(task instanceof Promise)) {
-                _reject(new Error("Task is neither a Promise object nor undefined/null."));
-                return;
-            }
-            task.then(function(_value) {
-                //  Save the task result.
-                previousResult = _value;
-
-                if (current + 1 == tasks.length) {
-                    //  All task executed successfully, now resolve with the lastest task result.
-                    _resolve(previousResult);
-                } else {
-                    //  Execute the next task.
-                    ++current;
-                    _ExecuteCurrentTask();
-                }
-            }, function(_reason) {
-                _reject(_reason);
-            });
         }
-
-        //  Execute the first task.
-        _ExecuteCurrentTask();
-    });
+        if (!(task instanceof Promise)) {
+            throw new Error("Task is neither a Promise object nor undefined/null.");
+        }
+        lastest = await task;
+    }
+    return lastest;
 }
 
 //  Export public APIs.

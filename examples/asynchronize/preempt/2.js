@@ -17,7 +17,7 @@ var XRTLibAsync = require("./../../../");
 (function() {
     var tasks = [];
     for (var i = 0; i < 5; ++i) {
-        tasks.push(XRTLibAsync.Asynchronize.Timeout.CreateTimeoutPromise(0.5 + Math.random(), i));
+        tasks.push(XRTLibAsync.Asynchronize.Timeout.CreateTimeoutPromise((0.5 + Math.random()) * 1000, i));
     }
     tasks.push(Promise.reject(new Error("This is an error.")));
     XRTLibAsync.Asynchronize.Preempt.CreatePreemptivePromise(tasks).then(function() {

@@ -11,10 +11,12 @@
 //  Imported modules.
 var CrAsyncPreempt = require("./../asynchronize/preempt");
 var CrPromiseQueue = require("./../promise/queue");
+var CrPromiseWrapper = require("./../promise/wrapper");
 var CrSyncConditional = require("./../synchronize/conditional");
 
 //  Imported classes.
 var PromiseQueue = CrPromiseQueue.PromiseQueue;
+var PromiseWrapper = CrPromiseWrapper.PromiseWrapper;
 var ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
 
 //
@@ -29,6 +31,60 @@ var SEMSTATE_COUNT = 2;
 //
 //  Classes.
 //
+
+/**
+ *  Semaphore wait context.
+ * 
+ *  @constructor
+ *  @param {PromiseWrapper} pw - The promise wrapper.
+ *  @param {ConditionalSynchronizer} cancellator - The cancellator.
+ */
+function SemaphoreWaitContext(pw, cancellator) {
+    //
+    //  Members.
+    //
+
+    //  Managed flag.
+    var managed = false;
+
+    //
+    //  Public methods.
+    //
+
+    /**
+     *  Mark the wait context as managed.
+     */
+    this.markAsManaged = function() {
+        managed = true;
+    };
+
+    /**
+     *  Get whether the wait context was managed.
+     * 
+     *  @return {Boolean} - True if so.
+     */
+    this.isManaged = function() {
+        return managed;
+    };
+
+    /**
+     *  Get the promise wrapper.
+     * 
+     *  @return {PromiseWrapper} - The promise wrapper.
+     */
+    this.getPromiseWrapper = function() {
+        return pw;
+    };
+
+    /**
+     *  Get the cancellator.
+     * 
+     *  @return {ConditionalSynchronizer} - The cancellator.
+     */
+    this.getCancellator = function() {
+        return cancellator;
+    };
+}
 
 /**
  *  Semaphore synchronizer.
@@ -57,7 +113,7 @@ function SemaphoreSynchronizer(initialCount) {
     /**
      *  P() operation queue.
      * 
-     *  @type {PromiseQueue<{resolver: (function(): void), rejector: (function(): void), cancellator: ConditionalSynchronizer, managed: Boolean}>}
+     *  @type {PromiseQueue<SemaphoreWaitContext>}
      */
     var queue = new PromiseQueue();
 
@@ -72,30 +128,32 @@ function SemaphoreSynchronizer(initialCount) {
      *  @return {Promise} - The promise object.
      */
     this.wait = function(cancellator) {
-        if (!(cancellator instanceof ConditionalSynchronizer)) {
+        if (arguments.length > 0) {
+            if (cancellator.isFullfilled()) {
+                return Promise.reject(new Error("The cancellator was already activated."));
+            }
+        } else {
             cancellator = new ConditionalSynchronizer();
-        }
-        if (cancellator.isFullfilled()) {
-            return Promise.reject(new Error("The cancellator was already activated."));
         }
         return new Promise(function(resolve, reject) {
             var cts = new CrSyncConditional.ConditionalSynchronizer();
-            var ctx = {
-                "resolver": function(value) {
-                    cts.fullfill();
-                    resolve(value);
-                },
-                "rejector": function(reason) {
-                    cts.fullfill();
-                    reject(reason);
-                },
-                "cancellator": cancellator,
-                "managed": false
-            };
+            var ctx = new SemaphoreWaitContext(
+                new PromiseWrapper(
+                    function(value) {
+                        cts.fullfill();
+                        resolve(value);
+                    },
+                    function(reason) {
+                        cts.fullfill();
+                        reject(reason);
+                    }
+                ),
+                cancellator
+            );
             queue.put(ctx);
             cancellator.waitWithCancellator(cts).then(function() {
-                if (!ctx.managed) {
-                    reject("The cancellator was activated.");
+                if (!ctx.isManaged()) {
+                    reject(new Error("The cancellator was activated."));
                 }
             }).catch(function() {
                 //  Do nothing.
@@ -132,6 +190,15 @@ function SemaphoreSynchronizer(initialCount) {
         return counter > 0 && queue.getLength() == 0;
     };
 
+    /**
+     *  Get whether there is a P() operation waiting for signal now.
+     * 
+     *  @return {Boolean} - True if so.
+     */
+    this.isWaiting = function() {
+        return state.getCurrent() == SEMSTATE_AWAIT;
+    };
+
     //
     //  Initializer.
     //
@@ -139,19 +206,22 @@ function SemaphoreSynchronizer(initialCount) {
     //  Run the state machine.
     (async function() {
         while(true) {
-            //  Get a P() operation context.
+            //  Get a wait context.
             /**
-             *  @type {?{resolver: (function(): void), rejector: (function(): void), cancellator: ConditionalSynchronizer, managed: Boolean}}
+             *  @type {SemaphoreWaitContext}
              */
             var ctx = await queue.get();
 
+            //  Get the cancellator of the wait context.
+            var cancellator = ctx.getCancellator();
+
             //  Ignore this context if it was cancelled.
-            if (ctx.cancellator.isFullfilled()) {
+            if (cancellator.isFullfilled()) {
                 continue;
             }
 
             //  Mark that we managed this context.
-            ctx.managed = true;
+            ctx.markAsManaged();
 
             if (counter <= 0) {
                 //  Wait for the counter to be greater than 0.
@@ -160,17 +230,17 @@ function SemaphoreSynchronizer(initialCount) {
                 //  Wait for signals.
                 var cts = new ConditionalSynchronizer();
                 var wh1 = state.waitWithCancellator(SEMSTATE_FREE, cts);
-                var wh2 = ctx.cancellator.waitWithCancellator(cts);
+                var wh2 = cancellator.waitWithCancellator(cts);
                 var rsv = await CrAsyncPreempt.CreatePreemptivePromise([wh1, wh2]);
 
                 //  Handle different signals
                 cts.fullfill();
                 var wh = rsv.getPromiseObject();
                 if (wh == wh1) {
-                    ctx.resolver();
+                    ctx.getPromiseWrapper().getResolveFunction().call(this);
                 } else if (wh == wh2) {
                     self.signal();
-                    ctx.rejector(new Error("The cancellator was activated."));
+                    ctx.getPromiseWrapper().getRejectFunction().call(this, new Error("The cancellator was activated."));
                 } else {
                     throw new Error("BUG: Invalid wait handler.");
                 }
@@ -179,7 +249,7 @@ function SemaphoreSynchronizer(initialCount) {
                 --counter;
 
                 //  Call the resolver.
-                ctx.resolver();
+                ctx.getPromiseWrapper().getResolveFunction().call(this);
             }
         }
     })().catch(function(error) {

@@ -5,11 +5,13 @@
 //
 
 //
-//  Imports
+//  Warning(s):
+//    [1] This module has been deprecated.
+//    [2] The existence of this module is ONLY for compatible. You shall NOT 
+//        use any API of this module in new application.
+//    [3] Use JavaScript's native async/await mechanism to replace this mod-
+//        ule.
 //
-
-//  Imported modules.
-var CrAsyncWaterfall = require("./waterfall");
 
 //
 //  Public functions.
@@ -22,29 +24,14 @@ var CrAsyncWaterfall = require("./waterfall");
  *  @param {function(): Promise} fn - The loop function.
  *  @return {Promise} - The promise object.
  */
-function RunAsynchronousLoop(fn) {
-    return new Promise(function(_resolve, _reject) {
-        /**
-         *  Loop cycle.
-         */
-        function _Cycle() {
-            var cycle = fn();
-            if (!(cycle instanceof Promise)) {
-                _reject("The loop function didn't return a Promise object.");
-                return;
-            }
-            cycle.then(function() {
-                //  Run the next cycle.
-                _Cycle();
-            }, function(reason) {
-                //  Break the loop.
-                _reject(reason);
-            });
+async function RunAsynchronousLoop(fn) {
+    while(true) {
+        var cycle = fn();
+        if (!(cycle instanceof Promise)) {
+            throw new Error("The loop function didn't return a Promise object.");
         }
-
-        //  Run the first cycle.
-        _Cycle();
-    });
+        await cycle;
+    }
 }
 
 /**
@@ -56,44 +43,18 @@ function RunAsynchronousLoop(fn) {
  *  @param {() => Promise} fnBody - The body function.
  *  @return {Promise} - The promise object.
  */
-function RunAsynchronousForNext(fnCondition, fnNext, fnBody) {
-    return new Promise(function(forNextResolve, forNextReject) {
-        RunAsynchronousLoop(function() {
-            return CrAsyncWaterfall.CreateWaterfallPromise([
-                function() {
-                    try {
-                        if (!fnCondition()) {
-                            return Promise.reject(null);
-                        }
-                        var body = fnBody();
-                    } catch(error) {
-                        return Promise.reject(error);
-                    }
-                    if (typeof(body) == "undefined" || body === null) {
-                        return Promise.resolve();
-                    } else if (body instanceof Promise) {
-                        return body;
-                    } else {
-                        return Promise.reject(new Error("Body function returned an invalid object."));
-                    }
-                },
-                function() {
-                    try {
-                        fnNext();
-                    } catch(error) {
-                        return Promise.reject(error);
-                    }
-                    return Promise.resolve();
-                }
-            ]);
-        }).catch(function(error) {
-            if (error !== null) {
-                forNextReject(error);
-                return;
-            }
-            forNextResolve();
-        });
-    });
+async function RunAsynchronousForNext(fnCondition, fnNext, fnBody) {
+    while(fnCondition()) {
+        var body = fnBody();
+        if (typeof(body) == "undefined" || body === null) {
+            //  Do nothing.
+        } else if (body instanceof Promise) {
+            await body;
+        } else {
+            throw new Error("Body function returned an invalid object.");
+        }
+        fnNext();
+    }
 }
 
 /**
@@ -104,43 +65,17 @@ function RunAsynchronousForNext(fnCondition, fnNext, fnBody) {
  *  @param {() => Promise} fnBody - The body function.
  *  @return {Promise} - The promise object.
  */
-function RunAsynchronousDoWhile(fnCondition, fnBody) {
-    return new Promise(function(wwNextResolve, wwReject) {
-        RunAsynchronousLoop(function() {
-            return CrAsyncWaterfall.CreateWaterfallPromise([
-                function() {
-                    try {
-                        var body = fnBody();
-                    } catch(error) {
-                        return Promise.reject(error);
-                    }
-                    if (typeof(body) == "undefined" || body === null) {
-                        return Promise.resolve();
-                    } else if (body instanceof Promise) {
-                        return body;
-                    } else {
-                        return Promise.reject(new Error("Body function returned an invalid object."));
-                    }
-                },
-                function() {
-                    try {
-                        if (!fnCondition()) {
-                            return Promise.reject(null);
-                        }
-                    } catch(error) {
-                        return Promise.reject(error);
-                    }
-                    return Promise.resolve();
-                }
-            ]);
-        }).catch(function(error) {
-            if (error !== null) {
-                wwReject(error);
-                return;
-            }
-            wwNextResolve();
-        });
-    });
+async function RunAsynchronousDoWhile(fnCondition, fnBody) {
+    do {
+        var body = fnBody();
+        if (typeof(body) == "undefined" || body === null) {
+            //  Do nothing.
+        } else if (body instanceof Promise) {
+            await body;
+        } else {
+            throw new Error("Body function returned an invalid object.");
+        }
+    } while(fnCondition());
 }
 
 //  Export public APIs.

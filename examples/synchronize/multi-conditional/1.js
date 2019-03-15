@@ -36,21 +36,19 @@ var SWITCH_OFF = 1;
     }, 1000);
 
     //  Monitor the switch.
-    XRTLibAsync.Asynchronize.Loop.RunAsynchronousLoop(function() {
-        return XRTLibAsync.Asynchronize.Waterfall.CreateWaterfallPromise([
-            function() {
-                return sw.wait(SWITCH_ON);
-            },
-            function() {
-                //  Maybe you can drive an Arduino board and a relay to turn on your light.
-                console.log("Switch ON!");
-                return sw.wait(SWITCH_OFF);
-            },
-            function() {
-                //  Now switch off the light.
-                console.log("Switch OFF!");
-                return Promise.resolve();
-            }
-        ]);
-    });
+    (async function() {
+        while(true) {
+            //  Wait for the switch to be turned ON.
+            await sw.wait(SWITCH_ON);
+
+            //  Maybe you can drive an Arduino board and a relay to turn on your light.
+            console.log("Switch ON!");
+
+            //  Wait for the switch to be turned OFF.
+            await sw.wait(SWITCH_OFF);
+
+            //  Now switch off the light.
+            console.log("Switch OFF!");
+        }
+    })();
 })();

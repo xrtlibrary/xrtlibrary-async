@@ -148,10 +148,11 @@ function PromiseQueue() {
      *  @return {Promise} - The promise object (resolves when available, rejects when cancelled).
      */
     this.wait = function(cancellator) {
-        if (!(cancellator instanceof ConditionalSynchronizer)) {
-            cancellator = new ConditionalSynchronizer();
+        if (arguments.length == 0) {
+            return syncHasPendingItem.wait();
+        } else {
+            return syncHasPendingItem.waitWithCancellator(cancellator);
         }
-        return syncHasPendingItem.waitWithCancellator(cancellator);
     };
 
     /**
@@ -165,6 +166,18 @@ function PromiseQueue() {
         syncHasPendingItem.unfullfill();
     };
 }
+
+//
+//  Event definitions.
+//
+
+/**
+ *  Promise queue change event.
+ * 
+ *  @event PromiseQueue#change
+ *  @param {Number} type - The action type (one of PROMISEQUEUEOP_*).
+ *  @param {*} item - The item related to the action.
+ */
 
 //
 //  Inheritances.

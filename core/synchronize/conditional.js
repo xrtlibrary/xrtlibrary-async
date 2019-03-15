@@ -152,8 +152,12 @@ function ConditionalSynchronizer() {
  *  @param {ConditionalSynchronizer[]} synchronizers - The synchronizers.
  *  @return {Promise<Array>} - The promise object.
  */
-ConditionalSynchronizer.waitAll = function(synchronizers) {
-    return ConditionalSynchronizer.waitAllWithCancellator(synchronizers, new ConditionalSynchronizer());
+ConditionalSynchronizer.waitAll = async function(synchronizers) {
+    var values = [];
+    for (var i = 0; i < synchronizers.length; ++i) {
+        values.push(await (synchronizers[i].wait()));
+    }
+    return values;
 };
 
 /**
@@ -240,7 +244,7 @@ function MultiConditionalSynchronzier(total, initial, initialData) {
      *        ocal variable to avoid memory leak.
      * 
      *  @param {Number} index - The condition index.
-     *  @param {ConditionalSynchronizer} [cancellator] - The cancellator.
+     *  @param {ConditionalSynchronizer} cancellator - The cancellator.
      *  @return {Promise<T>} - The promise object (reject when cancelled before fullfilled).
      */
     this.waitWithCancellator = function(index, cancellator) {

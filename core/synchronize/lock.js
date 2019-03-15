@@ -43,7 +43,11 @@ function LockSynchronizer() {
      *  @return {Promise<ConditionalSynchronizer>} - The promise object (release synchronizer will be passed).
      */
     this.acquire = async function(cancellator) {
-        await semaphore.wait(cancellator);
+        if (arguments.length > 0) {
+            await semaphore.wait(cancellator);
+        } else {
+            await semaphore.wait();
+        }
         var releaser = new ConditionalSynchronizer();
         releaser.wait().then(function() {
             semaphore.signal();
