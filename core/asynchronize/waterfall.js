@@ -11,6 +11,7 @@
 /**
  *  Create a waterfall promise.
  * 
+ *  @deprecated Use JavaScript's native async/await mechanism instead.
  *  @param {(function(): Promise)[]} tasks - The tasks.
  *  @param {Boolean} [strictMode] - True if a task function must return with a Promise object.
  *  @return {Promise} - The waterfall promise (resolve with the the value of the lastest task).

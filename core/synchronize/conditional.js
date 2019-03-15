@@ -5,13 +5,6 @@
 //
 
 //
-//  Imports.
-//
-
-//  Imported modules.
-var CrAsyncPreempt = require("./../asynchronize/preempt");
-
-//
 //  Classes.
 //
 
@@ -170,39 +163,15 @@ ConditionalSynchronizer.waitAll = function(synchronizers) {
  *  @param {ConditionalSynchronizer} cancellator - The cancellator.
  *  @return {Promise<Array>} - The promise object (reject if cancelled).
  */
-ConditionalSynchronizer.waitAllWithCancellator = function(synchronizers, cancellator) {
+ConditionalSynchronizer.waitAllWithCancellator = async function(synchronizers, cancellator) {
     if (cancellator.isFullfilled()) {
-        return Promise.reject(new Error("The cancellator has already been activated."));
+        throw new Error("The cancellator has already been activated.");
     }
-    if (synchronizers.length == 0) {
-        return Promise.resolve([]);
+    var values = [];
+    for (var i = 0; i < synchronizers.length; ++i) {
+        values.push(await (synchronizers[i].waitWithCancellator(cancellator)));
     }
-    return new Promise(function(resolve, reject) {
-        var current = 0;
-        var values = [];
-        function _Next() {
-            var cts = new ConditionalSynchronizer();
-            var wh1 = synchronizers[current].waitWithCancellator(cts);
-            var wh2 = cancellator.waitWithCancellator(cts);
-            CrAsyncPreempt.CreatePreemptivePromise([wh1, wh2]).then(function(rsv) {
-                cts.fullfill();
-                var wh = rsv.getPromiseObject();
-                if (wh == wh1) {
-                    values.push(rsv.getValue());
-                    if (++current >= synchronizers.length) {
-                        resolve(values);
-                    } else {
-                        _Next();
-                    }
-                } else if (wh == wh2) {
-                    reject(new Error("The cancellator was activated."));
-                } else {
-                    reject(new Error("BUG: Invalid wait handle."));
-                }
-            });
-        }
-        _Next();
-    });
+    return values;
 };
 
 /**

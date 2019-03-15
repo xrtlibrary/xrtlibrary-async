@@ -9,9 +9,7 @@
 //
 
 //  Imported modules.
-var CrAsyncLoop = require("./../asynchronize/loop");
 var CrAsyncPreempt = require("./../asynchronize/preempt");
-var CrAsyncWaterfall = require("./../asynchronize/waterfall");
 var CrPromiseQueue = require("./../promise/queue");
 var CrSyncConditional = require("./../synchronize/conditional");
 
@@ -139,73 +137,55 @@ function SemaphoreSynchronizer(initialCount) {
     //
 
     //  Run the state machine.
-    CrAsyncLoop.RunAsynchronousLoop(function() {
-        /**
-         *  @type {?{resolver: (function(): void), rejector: (function(): void), cancellator: ConditionalSynchronizer, managed: Boolean}}
-         */
-        var ctx = null;
-        return new Promise(function(semHandleNext) {
-            CrAsyncWaterfall.CreateWaterfallPromise([
-                function() {
-                    //  Get a P() operation context.
-                    return queue.get();
-                },
-                function(_ctx) {
-                    //  Save the context.
-                    ctx = _ctx;
-    
-                    //  Ignore this context if it was cancelled.
-                    if (ctx.cancellator.isFullfilled()) {
-                        return Promise.reject(null);
-                    }
+    (async function() {
+        while(true) {
+            //  Get a P() operation context.
+            /**
+             *  @type {?{resolver: (function(): void), rejector: (function(): void), cancellator: ConditionalSynchronizer, managed: Boolean}}
+             */
+            var ctx = await queue.get();
 
-                    //  Mark that we managed this context.
-                    ctx.managed = true;
+            //  Ignore this context if it was cancelled.
+            if (ctx.cancellator.isFullfilled()) {
+                continue;
+            }
 
-                    if (counter <= 0) {
-                        //  Wait for the counter to be greater than 0.
-                        state.switch(SEMSTATE_AWAIT);
-                        var cts = new CrSyncConditional.ConditionalSynchronizer();
-                        var wh1 = state.waitWithCancellator(SEMSTATE_FREE, cts);
-                        var wh2 = ctx.cancellator.waitWithCancellator(cts);
-                        return new Promise(function(semHoldAck, semHoldReject) {
-                            CrAsyncPreempt.CreatePreemptivePromise([wh1, wh2]).then(function(rsv) {
-                                cts.fullfill();
-                                var wh = rsv.getPromiseObject();
-                                if (wh == wh1) {
-                                    semHoldAck();
-                                } else if (wh == wh2) {
-                                    self.signal();
-                                    ctx.rejector(new Error("The cancellator was activated."));
-                                    semHoldReject(null);
-                                } else {
-                                    semHoldReject(new Error("Invalid wait handler."));
-                                }
-                            });
-                        });
-                    } else {
-                        //  Decrease the counter.
-                        --counter;
-                        return Promise.resolve();
-                    }
-                },
-                function() {
-                    //  Call the resolver.
+            //  Mark that we managed this context.
+            ctx.managed = true;
+
+            if (counter <= 0) {
+                //  Wait for the counter to be greater than 0.
+                state.switch(SEMSTATE_AWAIT);
+
+                //  Wait for signals.
+                var cts = new ConditionalSynchronizer();
+                var wh1 = state.waitWithCancellator(SEMSTATE_FREE, cts);
+                var wh2 = ctx.cancellator.waitWithCancellator(cts);
+                var rsv = await CrAsyncPreempt.CreatePreemptivePromise([wh1, wh2]);
+
+                //  Handle different signals
+                cts.fullfill();
+                var wh = rsv.getPromiseObject();
+                if (wh == wh1) {
                     ctx.resolver();
-
-                    return Promise.resolve();
-                }
-            ], true).then(function() {
-                semHandleNext();
-            }).catch(function(error) {
-                if (error) {
-                    throw error;
+                } else if (wh == wh2) {
+                    self.signal();
+                    ctx.rejector(new Error("The cancellator was activated."));
                 } else {
-                    semHandleNext();
+                    throw new Error("BUG: Invalid wait handler.");
                 }
-            });
-        });
+            } else {
+                //  Decrease the counter.
+                --counter;
 
+                //  Call the resolver.
+                ctx.resolver();
+            }
+        }
+    })().catch(function(error) {
+        if (error) {
+            throw error;
+        }
     });
 }
 

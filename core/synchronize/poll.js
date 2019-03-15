@@ -9,8 +9,8 @@
 //
 
 //  Imported modules.
+var CrAsyncTimeout = require("./../asynchronize/timeout");
 var CrSyncConditional = require("./conditional");
-var XRTLibTimer = require("xrtlibrary-timer");
 
 //  Imported classes.
 var ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
@@ -45,40 +45,28 @@ function PollFor(detector, delayMin, delayMax, delayIncreaseRatio, cancellator) 
  *  @param {ConditionalSynchronizer} [cancellator] - The cancellator.
  *  @return {Promise<T>} - The promise object.
  */
-function PollForEx(detector, resvData, delayMin, delayMax, delayIncreaseRatio, cancellator) {
+async function PollForEx(detector, resvData, delayMin, delayMax, delayIncreaseRatio, cancellator) {
+    //  Create a cancellator if not set.
     if (!(cancellator instanceof ConditionalSynchronizer)) {
         cancellator = new ConditionalSynchronizer();
     }
+
+    //  Check the initial state of the cancellator.
     if (cancellator.isFullfilled()) {
-        return Promise.reject(new Error("The cancellator was already activated."));
+        throw new Error("The cancellator was already activated.");
     }
-    return new Promise(function(_resolve, _reject) {
-        //  Configure the initial delay..
-        var delay = delayMin;
 
-        /**
-         *  Timer tick.
-         */
-        function _Tick() {
-            if (cancellator.isFullfilled()) {
-                _reject(new Error("The cancellator was activated."));
-                return;
-            }
-            try {
-                if (detector.call(this)) {
-                    _resolve(resvData);
-                } else {
-                    delay = Math.min(delay * delayIncreaseRatio, delayMax);
-                    XRTLibTimer.SetTimeout(_Tick, delay);
-                }
-            } catch(_error) {
-                _reject(_error);
-            }
+    //  Configure the initial delay..
+    var delay = delayMin;
+
+    //  Wait.
+    while(true) {
+        await CrAsyncTimeout.CreateTimeoutPromiseEx(delay, cancellator);
+        if (detector.call(this)) {
+            return resvData;
         }
-
-        //  Start polling.
-        XRTLibTimer.SetTimeout(_Tick, delay);
-    });
+        delay = Math.min(delay * delayIncreaseRatio, delayMax);
+    }
 }
 
 //  Export public APIs.

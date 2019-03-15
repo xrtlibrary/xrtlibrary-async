@@ -9,7 +9,6 @@
 //
 
 //  Imported modules.
-var CrAsyncWaterfall = require("./../asynchronize/waterfall");
 var CrSyncSemaphore = require("./semaphore");
 var CrSyncConditional = require("./conditional");
 
@@ -43,19 +42,13 @@ function LockSynchronizer() {
      *  @param {ConditionalSynchronizer} [cancellator] - The cancellator.
      *  @return {Promise<ConditionalSynchronizer>} - The promise object (release synchronizer will be passed).
      */
-    this.acquire = function(cancellator) {
-        return CrAsyncWaterfall.CreateWaterfallPromise([
-            function() {
-                return semaphore.wait(cancellator);
-            },
-            function() {
-                var releaser = new ConditionalSynchronizer();
-                releaser.wait().then(function() {
-                    semaphore.signal();
-                });
-                return Promise.resolve(releaser);
-            }
-        ]);
+    this.acquire = async function(cancellator) {
+        await semaphore.wait(cancellator);
+        var releaser = new ConditionalSynchronizer();
+        releaser.wait().then(function() {
+            semaphore.signal();
+        });
+        return releaser;
     };
 }
 

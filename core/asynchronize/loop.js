@@ -18,6 +18,7 @@ var CrAsyncWaterfall = require("./waterfall");
 /**
  *  Run a loop asynchronously.
  * 
+ *  @deprecated Use JavaScript's native async/await mechanism instead.
  *  @param {function(): Promise} fn - The loop function.
  *  @return {Promise} - The promise object.
  */
@@ -49,6 +50,7 @@ function RunAsynchronousLoop(fn) {
 /**
  *  Run a for-next statement asynchronously.
  * 
+ *  @deprecated Use JavaScript's native async/await mechanism instead.
  *  @param {() => Boolean} fnCondition - The condition function.
  *  @param {() => void} fnNext - The next function.
  *  @param {() => Promise} fnBody - The body function.
@@ -97,6 +99,7 @@ function RunAsynchronousForNext(fnCondition, fnNext, fnBody) {
 /**
  *  Run a do-while statement asynchronously.
  * 
+ *  @deprecated Use JavaScript's native async/await mechanism instead.
  *  @param {() => Boolean} fnCondition - The condition function.
  *  @param {() => Promise} fnBody - The body function.
  *  @return {Promise} - The promise object.

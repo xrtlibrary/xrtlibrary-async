@@ -43,32 +43,35 @@ function CreateTimeoutPromise(timespan, value) {
  *  @param {*} [value] - (Optional) The resolve value.
  *  @return {Promise} - The promise object (reject when cancelled).
  */
-function CreateTimeoutPromiseEx(timespan, cancellator, value) {
-    return new Promise(function(resolve, reject) {
-        var cts = new ConditionalSynchronizer();
-        var timerSync = new ConditionalSynchronizer();
-        var timer = XRTLibTimer.SetTimeout(function() {
-            timer = null;
-            timerSync.fullfill();
-        }, timespan);
-        var wh1 = timerSync.waitWithCancellator(cts);
-        var wh2 = cancellator.waitWithCancellator(cts);
-        CrAsyncPreempt.CreatePreemptivePromise([wh1, wh2]).then(function(rsv) {
-            cts.fullfill();
-            if (timer !== null) {
-                XRTLibTimer.ClearTimeout(timer);
-                timer = null;
-            }
-            var wh = rsv.getPromiseObject();
-            if (wh == wh1) {
-                resolve(value);
-            } else if (wh == wh2) {
-                reject(new Error("The cancellator was activated."));
-            } else {
-                reject(new Error("BUG: Invalid wait handler."));
-            }
-        });
-    });
+async function CreateTimeoutPromiseEx(timespan, cancellator, value) {
+    //  Create a timer.
+    var timerSync = new ConditionalSynchronizer();
+    var timer = XRTLibTimer.SetTimeout(function() {
+        timer = null;
+        timerSync.fullfill();
+    }, timespan);
+
+    //  Wait for signals.
+    var cts = new ConditionalSynchronizer();
+    var wh1 = timerSync.waitWithCancellator(cts);
+    var wh2 = cancellator.waitWithCancellator(cts);
+    var rsv = await CrAsyncPreempt.CreatePreemptivePromise([wh1, wh2]);
+
+    //  Handle different signals.
+    cts.fullfill();
+    if (timer !== null) {
+        //  Stop the timer.
+        XRTLibTimer.ClearTimeout(timer);
+        timer = null;
+    }
+    var wh = rsv.getPromiseObject();
+    if (wh == wh1) {
+        return value;
+    } else if (wh == wh2) {
+        throw new Error("The cancellator was activated.");
+    } else {
+        throw new Error("BUG: Invalid wait handler.");
+    }
 }
 
 //  Export public APIs.

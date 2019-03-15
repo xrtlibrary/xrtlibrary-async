@@ -79,7 +79,7 @@ function PreemptReject(reason, promise) {
  *  @return {Promise<PreemptResolve>} - The waterfall promise.
  */
 function CreatePreemptivePromise(tasks) {
-    return new Promise(function(_resolve, _reject) {
+    return new Promise(function(resolve, reject) {
         var preempted = false;
         for (var i = 0; i < tasks.length; ++i) {
             (function(_i) {
@@ -89,13 +89,13 @@ function CreatePreemptivePromise(tasks) {
                         return;
                     }
                     preempted = true;
-                    _resolve(new PreemptResolve(_value, task));
+                    resolve(new PreemptResolve(_value, task));
                 }, function(_error) {
                     if (preempted) {
                         return;
                     }
                     preempted = true;
-                    _reject(new PreemptReject(_error, task));
+                    reject(new PreemptReject(_error, task));
                 });
             })(i);
         }
