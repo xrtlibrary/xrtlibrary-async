@@ -13,6 +13,7 @@ var CrAsyncLoop = require("./../core/asynchronize/loop");
 var CrAsyncPreempt = require("./../core/asynchronize/preempt");
 var CrAsyncTimeout = require("./../core/asynchronize/timeout");
 var CrAsyncWaterfall = require("./../core/asynchronize/waterfall");
+var CrEventWaiter = require("./../core/event/waiter");
 var CrPromiseQueue = require("./../core/promise/queue");
 var CrPromiseWrapper = require("./../core/promise/wrapper");
 var CrSyncConditional = require("./../core/synchronize/conditional");
@@ -41,6 +42,9 @@ module.exports = {
         "Waterfall": {
             "CreateWaterfallPromise": CrAsyncWaterfall.CreateWaterfallPromise
         }
+    },
+    "Event": {
+        "WaitEvent": CrEventWaiter.WaitEvent
     },
     "Promise": {
         "PROMISEQUEUEOP_POP": CrPromiseQueue.PROMISEQUEUEOP_POP,
