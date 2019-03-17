@@ -89,6 +89,14 @@ function SemaphoreWaitContext(pw, cancellator) {
 /**
  *  Semaphore synchronizer.
  * 
+ *  Note(s):
+ *    [1] All P() operations would be queued an processed one-by-one.
+ *    [2] The order of acquiring the semaphore depends on the order of P() operations.
+ *    [3] The earlier the P() operation requests, the earlier the P() operation acqui-
+ *        res the semaphore.
+ *    [4] The implementation promises that the order of acquiring the semaphore is hi-
+ *        ghly reliable and won't be changed in future releases of this library.
+ * 
  *  @constructor
  *  @param {Number} initialCount - The initial value of the internal counter.
  */

@@ -75,6 +75,11 @@ function PreemptReject(reason, promise) {
 /**
  *  Create a preemptive promise (the first finish/failed task will take over the promise).
  * 
+ *  Note(s):
+ *    [1] Generally, when more than one tasks are in settled states, the task which has the 
+ *        smallest index in tasks array would be returned. But you shall NOT rely on this. 
+ *        This behavior MAY changes in future releases of this library.
+ * 
  *  @param {Promise[]} tasks - The tasks.
  *  @return {Promise<PreemptResolve>} - The waterfall promise.
  */

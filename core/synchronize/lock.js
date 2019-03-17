@@ -22,6 +22,14 @@ var ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
 /**
  *  Lock synchronizer.
  * 
+ *  Note(s):
+ *    [1] All lock-acquire request would be queued an processed one-by-one.
+ *    [2] The order of acquiring the lock depends on the order of lock-acquire operations.
+ *    [3] The earlier the lock-acquire operation requests, the earlier the lock-acquire 
+ *        operation acquires the lock.
+ *    [4] The implementation promises that the order of acquiring the lock is highly reli-
+ *        able and the behavior won't be changed in future releases of this library.
+ * 
  *  @constructor
  */
 function LockSynchronizer() {
