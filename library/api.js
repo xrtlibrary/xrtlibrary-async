@@ -15,6 +15,7 @@ var CrAsyncTimeout = require("./../core/asynchronize/timeout");
 var CrAsyncWaterfall = require("./../core/asynchronize/waterfall");
 var CrEventWaiter = require("./../core/event/waiter");
 var CrPromiseQueue = require("./../core/promise/queue");
+var CrPromiseQueue2 = require("./../core/promise/queue2");
 var CrPromiseWrapper = require("./../core/promise/wrapper");
 var CrSyncConditional = require("./../core/synchronize/conditional");
 var CrSyncLock = require("./../core/synchronize/lock");
@@ -50,6 +51,7 @@ module.exports = {
         "PROMISEQUEUEOP_POP": CrPromiseQueue.PROMISEQUEUEOP_POP,
         "PROMISEQUEUEOP_PUSH": CrPromiseQueue.PROMISEQUEUEOP_PUSH,
         "PromiseQueue": CrPromiseQueue.PromiseQueue,
+        "PromiseQueue2": CrPromiseQueue2.PromiseQueue,
         "PromiseWrapper": CrPromiseWrapper.PromiseWrapper
     },
     "Synchronize": {
