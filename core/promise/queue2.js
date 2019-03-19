@@ -89,6 +89,7 @@ function PromiseQueueReceipt() {
     //  Synchronizers.
     var syncAccept = new ConditionalSynchronizer();
     var syncDecline = new ConditionalSynchronizer();
+    var syncReceiptAck = new ConditionalSynchronizer();
 
     //
     //  Public methods.
@@ -110,6 +111,15 @@ function PromiseQueueReceipt() {
      */
     this.getDeclineSynchronizer = function() {
         return syncDecline;
+    };
+
+    /**
+     *  Get the receipt acknowledge synchronizer.
+     * 
+     *  @return {ConditionalSynchronizer} - The synchronizer.
+     */
+    this.getReceiptAcknowledgeSynchronizer = function() {
+        return syncReceiptAck;
     };
 }
 
@@ -195,6 +205,9 @@ function PromiseQueue() {
 
     //  Self reference.
     var self = this;
+
+    //  Waiting for receipt flag.
+    var isWaitingReceipt = false;
 
     /**
      *  Pop contexts queue.
@@ -313,6 +326,15 @@ function PromiseQueue() {
     //
 
     /**
+     *  Get whether this object is waiting for a receipt.
+     * 
+     *  @return {Boolean} - True if so.
+     */
+    this.isWaitingForReceipt = function() {
+        return isWaitingReceipt;
+    };
+
+    /**
      *  Pop an item asynchronously.
      * 
      *  Exception(s):
@@ -379,6 +401,24 @@ function PromiseQueue() {
             });
         });
     }
+
+    /**
+     *  Unpop an item.
+     * 
+     *  Note(s):
+     *    [1] This method can't be called when this object is waiting for a receipt.
+     * 
+     *  Exception(s):
+     *    [1] PromiseQueue.InvalidOperationError: Raised this object is still waiting for a receipt.
+     * 
+     *  @type {T} - The item.
+     */
+    this.unpop = function(item) {
+        if (isWaitingReceipt) {
+            throw new PromiseQueueInvalidOperationError("Unable to unpop when this object is waiting for a receipt.");
+        }
+        _QueueItems_Unpop(item);
+    };
 
     /**
      *  Push an item.
@@ -450,6 +490,9 @@ function PromiseQueue() {
             //  Wait for receipt.
             var popContextReceipt = popContext.getReceipt();
             if (popContextReceipt) {
+                //  Mark as waiting for receipt.
+                isWaitingReceipt = true;
+
                 //  Wait for signals.
                 var cts = new ConditionalSynchronizer();
                 var wh1 = popContextReceipt.getAcceptSynchronizer().waitWithCancellator(cts);
@@ -457,15 +500,23 @@ function PromiseQueue() {
                 var rsv = await CrAsyncPreempt.CreatePreemptivePromise([wh1, wh2]);
 
                 //  Handle different signals.
-                cts.fullfill();
-                var wh = rsv.getPromiseObject();
-                if (wh == wh1) {
-                    //  Do nothing.
-                } else if (wh == wh2) {
-                    //  Give back the item.
-                    _QueueItems_Unpop(popItem);
-                } else {
-                    throw new PromiseQueueError("BUG: Invalid wait handler.");
+                try {
+                    cts.fullfill();
+                    var wh = rsv.getPromiseObject();
+                    if (wh == wh1) {
+                        //  Do nothing.
+                    } else if (wh == wh2) {
+                        //  Give back the item.
+                        _QueueItems_Unpop(popItem);
+                    } else {
+                        throw new PromiseQueueError("BUG: Invalid wait handler.");
+                    }
+                } finally {
+                    //  Mark as not waited for the receipt.
+                    isWaitingReceipt = false;
+
+                    //  Mark that we acknowledged the receipt.
+                    popContextReceipt.getReceiptAcknowledgeSynchronizer().fullfill();
                 }
             }
         }
