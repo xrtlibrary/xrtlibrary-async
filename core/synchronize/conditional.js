@@ -5,8 +5,70 @@
 //
 
 //
+//  Imports.
+//
+
+//  Imported modules.
+var Util = require("util");
+
+//
 //  Classes.
 //
+
+/**
+ *  Conditional synchronizer error.
+ * 
+ *  @constructor
+ *  @param {String} [message] - The message.
+ */
+function ConditionalSynchronizerError(message) {
+    //  Let parent class initialize.
+    if (arguments.length > 0) {
+        Error.call(this, message);
+        this.message = message;
+    } else {
+        Error.call(this);
+        this.message = "Unknown error.";
+    }
+    Error.captureStackTrace(this, this.constructor);
+    this.name = this.constructor.name;
+}
+
+/**
+ *  Conditional synchronizer operation cancelled error.
+ * 
+ *  @constructor
+ *  @extends {ConditionalSynchronizerError}
+ *  @param {String} [message] - The message.
+ */
+function ConditionalSynchronizerOperationCancelledError(message) {
+    //  Let parent class initialize.
+    ConditionalSynchronizerError.apply(this, arguments);
+}
+
+/**
+ *  Conditional synchronizer invalid operation error.
+ * 
+ *  @constructor
+ *  @extends {ConditionalSynchronizerError}
+ *  @param {String} [message] - The message.
+ */
+function ConditionalSynchronizerInvalidOperationError(message) {
+    //  Let parent class initialize.
+    ConditionalSynchronizerError.apply(this, arguments);
+}
+
+/**
+ *  Conditional synchronizer index out of range error.
+ * 
+ *  @constructor
+ *  @extends {ConditionalSynchronizerError}
+ *  @param {String} [message] - The message.
+ */
+function ConditionalSynchronizerIndexOutOfRangeError(message) {
+    //  Let parent class initialize.
+    ConditionalSynchronizerError.apply(this, arguments);
+}
 
 /**
  *  Conditional-based synchronizer.
@@ -63,13 +125,17 @@ function ConditionalSynchronizer() {
      *        cancellator. It's highly recommended to declare the cancellator as a l-
      *        ocal variable to avoid memory leak.
      * 
+     *  Exception(s):
+     *    [1] ConditionalSynchronizer.OperationCancelledError: Raised when the the cancellator 
+     *                                                         was activated.
+     * 
      *  @param {ConditionalSynchronizer} cancellator - The cancellator.
      *  @return {Promise<T>} - The promise object (reject when cancelled before fullfilled).
      */
     this.waitWithCancellator = function(cancellator) {
         return new Promise(function(resolve, reject) {
             if (cancellator.isFullfilled()) {
-                reject(new Error("The cancellator was already activated."));
+                reject(new ConditionalSynchronizerOperationCancelledError("The cancellator was already activated."));
                 return;
             }
             if (fullfilled) {
@@ -78,7 +144,7 @@ function ConditionalSynchronizer() {
                 cancellator.wait().then(function() {
                     if (waiting.has(resolve)) {
                         waiting.delete(resolve);
-                        reject(new Error("The cancellator was activated."));
+                        reject(new ConditionalSynchronizerOperationCancelledError("The cancellator was activated."));
                     }
                 });
                 waiting.add(resolve);
@@ -88,6 +154,10 @@ function ConditionalSynchronizer() {
 
     /**
      *  Mark the condition as fullfilled.
+     * 
+     *  Note(s):
+     *    [1] If the synchronizer has already been fullfilled, calling to this method would be 
+     *        ignored.
      * 
      *  @param {T} [data] - (Optional) The data.
      */
@@ -116,6 +186,9 @@ function ConditionalSynchronizer() {
 
     /**
      *  Mark the condition as unfullfilled.
+     * 
+     *  Note(s):
+     *    [1] If the synchronizer is not fullfilled, calling to this method would be ignored.
      */
     this.unfullfill = function() {
         fullfilled = false;
@@ -134,17 +207,25 @@ function ConditionalSynchronizer() {
     /**
      *  Get the fullfilled data.
      * 
+     *  Exception(s):
+     *    [1] ConditionalSynchronizer.InvalidOperationError: Raised when the synchronizer 
+     *                                                       is not fullfilled.
+     * 
      *  @return {T} - The data (throw an error if not fullfilled).
      */
     this.getFullfilledData = function() {
         //  Check fullfilled.
         if (!fullfilled) {
-            throw new Error("Not fullfilled yet.");
+            throw new ConditionalSynchronizerInvalidOperationError("Not fullfilled yet.");
         }
 
         return fullfillData;
     };
 }
+ConditionalSynchronizer.Error = ConditionalSynchronizerError;
+ConditionalSynchronizer.OperationCancelledError = ConditionalSynchronizerOperationCancelledError;
+ConditionalSynchronizer.InvalidOperationError = ConditionalSynchronizerInvalidOperationError;
+ConditionalSynchronizer.IndexOutOfRangeError = ConditionalSynchronizerIndexOutOfRangeError;
 
 /**
  *  Wait for all conditional synchronizers to be fullfilled.
@@ -163,13 +244,17 @@ ConditionalSynchronizer.waitAll = async function(synchronizers) {
 /**
  *  Wait for all conditional synchronizers to be fullfilled with a cancellable mechanism.
  * 
+ *  Exception(s):
+ *    [1] ConditionalSynchronizer.OperationCancelledError: Raised when the the cancellator 
+ *                                                         was activated.
+ * 
  *  @param {ConditionalSynchronizer[]} synchronizers - The synchronizers.
  *  @param {ConditionalSynchronizer} cancellator - The cancellator.
  *  @return {Promise<Array>} - The promise object (reject if cancelled).
  */
 ConditionalSynchronizer.waitAllWithCancellator = async function(synchronizers, cancellator) {
     if (cancellator.isFullfilled()) {
-        throw new Error("The cancellator has already been activated.");
+        throw new ConditionalSynchronizerOperationCancelledError("The cancellator has already been activated.");
     }
     var values = [];
     for (var i = 0; i < synchronizers.length; ++i) {
@@ -209,11 +294,15 @@ function MultiConditionalSynchronzier(total, initial, initialData) {
     /**
      *  Assert the correction range of specific index.
      * 
+     *  Exception(s):
+     *    [1] ConditionalSynchronizer.IndexOutOfRangeError: Raised when the index is out 
+     *                                                      of range.
+     * 
      *  @param {Number} index - The index.
      */
     function _AssertIndexWithinRange(index) {
         if (index < 0 || index >= total) {
-            throw new Error("Index out of range.");
+            throw new ConditionalSynchronizerIndexOutOfRangeError("Index out of range.");
         }
     }
 
@@ -223,6 +312,10 @@ function MultiConditionalSynchronzier(total, initial, initialData) {
 
     /**
      *  Wait for specific condition.
+     * 
+     *  Exception(s):
+     *    [1] ConditionalSynchronizer.IndexOutOfRangeError: Raised when the index is out 
+     *                                                      of range.
      * 
      *  @param {Number} index - The condition index.
      *  @return {Promise<T>} - The promise object (never raise error.).
@@ -243,6 +336,11 @@ function MultiConditionalSynchronzier(total, initial, initialData) {
      *        cancellator. It's highly recommended to declare the cancellator as a l-
      *        ocal variable to avoid memory leak.
      * 
+     *  Exception(s):
+     *    [1] ConditionalSynchronizer.IndexOutOfRangeError: Raised when the index is out of range.
+     *    [2] ConditionalSynchronizer.OperationCancelledError: Raised when the the cancellator was 
+     *                                                         activated.
+     * 
      *  @param {Number} index - The condition index.
      *  @param {ConditionalSynchronizer} cancellator - The cancellator.
      *  @return {Promise<T>} - The promise object (reject when cancelled before fullfilled).
@@ -257,6 +355,9 @@ function MultiConditionalSynchronzier(total, initial, initialData) {
 
     /**
      *  Switch to specific condition.
+     * 
+     *  Exception(s):
+     *    [1] ConditionalSynchronizer.IndexOutOfRangeError: Raised when the index is out of range.
      * 
      *  @param {Number} - The condition index.
      *  @param {T} [data] - The promise data.
@@ -300,7 +401,7 @@ function MultiConditionalSynchronzier(total, initial, initialData) {
     (function() {
         //  Check the input.
         if (total < 0 || initial >= total) {
-            throw new Error("Invalid construct parameters.");
+            throw new ConditionalSynchronizerIndexOutOfRangeError("Invalid initial index.");
         }
 
         //  Create conditionals.
@@ -355,19 +456,23 @@ function AutomateUnlockConditionalSynchronizer() {
      *        cancellator. It's highly recommended to declare the cancellator as a l-
      *        ocal variable to avoid memory leak.
      * 
+     *  Exception(s):
+     *    [1] ConditionalSynchronizer.OperationCancelledError: Raised when the the cancellator 
+     *                                                         was activated.
+     * 
      *  @param {ConditionalSynchronizer} cancellator - The cancellator.
      *  @return {Promise<T>} - The promise object (reject when cancelled before fullfilled).
      */
     this.waitWithCancellator = function(cancellator) {
         return new Promise(function(resolve, reject) {
             if (cancellator.isFullfilled()) {
-                reject(new Error("The cancellator was already activated."));
+                reject(new ConditionalSynchronizerOperationCancelledError("The cancellator was already activated."));
                 return;
             }
             cancellator.wait().then(function() {
                 if (waiting.has(resolve)) {
                     waiting.delete(resolve);
-                    reject(new Error("The cancellator was activated."));
+                    reject(new ConditionalSynchronizerOperationCancelledError("The cancellator was activated."));
                 }
             });
             waiting.add(resolve);
@@ -412,6 +517,14 @@ function ForkSet(origin) {
     });
     return forked;
 }
+
+//
+//  Inheritances.
+//
+Util.inherits(ConditionalSynchronizerError, Error);
+Util.inherits(ConditionalSynchronizerOperationCancelledError, ConditionalSynchronizerError);
+Util.inherits(ConditionalSynchronizerInvalidOperationError, ConditionalSynchronizerError);
+Util.inherits(ConditionalSynchronizerIndexOutOfRangeError, ConditionalSynchronizerError);
 
 //  Export public APIs.
 module.exports = {

@@ -10,12 +10,13 @@
 
 //  Imported modules.
 var CrAsyncPreempt = require("./../asynchronize/preempt");
-var CrPromiseQueue = require("./../promise/queue");
+var CrPromiseQueue2 = require("./../promise/queue2");
 var CrPromiseWrapper = require("./../promise/wrapper");
 var CrSyncConditional = require("./../synchronize/conditional");
+var Util = require("util");
 
 //  Imported classes.
-var PromiseQueue = CrPromiseQueue.PromiseQueue;
+var PromiseQueue2 = CrPromiseQueue2.PromiseQueue;
 var PromiseWrapper = CrPromiseWrapper.PromiseWrapper;
 var ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
 
@@ -31,6 +32,37 @@ var SEMSTATE_COUNT = 2;
 //
 //  Classes.
 //
+
+/**
+ *  Semaphore synchronizer error.
+ * 
+ *  @constructor
+ *  @param {String} [message] - The message.
+ */
+function SemaphoreSynchronizerError(message) {
+    //  Let parent class initialize.
+    if (arguments.length > 0) {
+        Error.call(this, message);
+        this.message = message;
+    } else {
+        Error.call(this);
+        this.message = "Unknown error.";
+    }
+    Error.captureStackTrace(this, this.constructor);
+    this.name = this.constructor.name;
+}
+
+/**
+ *  Semaphore synchronizer operation cancelled error.
+ * 
+ *  @constructor
+ *  @extends {SemaphoreSynchronizerError}
+ *  @param {String} [message] - The message.
+ */
+function SemaphoreSynchronizerOperationCancelledError(message) {
+    //  Let parent class initialize.
+    SemaphoreSynchronizerError.apply(this, arguments);
+}
 
 /**
  *  Semaphore wait context.
@@ -121,9 +153,9 @@ function SemaphoreSynchronizer(initialCount) {
     /**
      *  P() operation queue.
      * 
-     *  @type {PromiseQueue<SemaphoreWaitContext>}
+     *  @type {PromiseQueue2<SemaphoreWaitContext>}
      */
-    var queue = new PromiseQueue();
+    var queue = new PromiseQueue2();
 
     //
     //  Public methods.
@@ -132,13 +164,16 @@ function SemaphoreSynchronizer(initialCount) {
     /**
      *  Do wait (P) operation.
      * 
+     *  Exception(s):
+     *    [1] SemaphoreSynchronizer.OperationCancelledError: Raised when the cancellator was activated.
+     * 
      *  @param {ConditionalSynchronizer} [cancellator] - The cancellator.
      *  @return {Promise} - The promise object.
      */
     this.wait = function(cancellator) {
         if (arguments.length > 0) {
             if (cancellator.isFullfilled()) {
-                return Promise.reject(new Error("The cancellator was already activated."));
+                return Promise.reject(new SemaphoreSynchronizerOperationCancelledError("The cancellator was already activated."));
             }
         } else {
             cancellator = new ConditionalSynchronizer();
@@ -158,10 +193,10 @@ function SemaphoreSynchronizer(initialCount) {
                 ),
                 cancellator
             );
-            queue.put(ctx);
+            queue.push(ctx);
             cancellator.waitWithCancellator(cts).then(function() {
                 if (!ctx.isManaged()) {
-                    reject(new Error("The cancellator was activated."));
+                    reject(new SemaphoreSynchronizerOperationCancelledError("The cancellator was activated."));
                 }
             }).catch(function() {
                 //  Do nothing.
@@ -195,7 +230,7 @@ function SemaphoreSynchronizer(initialCount) {
      *  @return {Boolean} - True if so.
      */
     this.isCanAcquireImmediately = function() {
-        return counter > 0 && queue.getLength() == 0;
+        return counter > 0 && queue.length == 0;
     };
 
     /**
@@ -218,7 +253,7 @@ function SemaphoreSynchronizer(initialCount) {
             /**
              *  @type {SemaphoreWaitContext}
              */
-            var ctx = await queue.get();
+            var ctx = await queue.pop();
 
             //  Get the cancellator of the wait context.
             var cancellator = ctx.getCancellator();
@@ -248,9 +283,12 @@ function SemaphoreSynchronizer(initialCount) {
                     ctx.getPromiseWrapper().getResolveFunction().call(this);
                 } else if (wh == wh2) {
                     self.signal();
-                    ctx.getPromiseWrapper().getRejectFunction().call(this, new Error("The cancellator was activated."));
+                    ctx.getPromiseWrapper().getRejectFunction().call(
+                        this, 
+                        new SemaphoreSynchronizerOperationCancelledError("The cancellator was activated.")
+                    );
                 } else {
-                    throw new Error("BUG: Invalid wait handler.");
+                    throw new SemaphoreSynchronizerError("BUG: Invalid wait handler.");
                 }
             } else {
                 //  Decrease the counter.
@@ -266,6 +304,14 @@ function SemaphoreSynchronizer(initialCount) {
         }
     });
 }
+SemaphoreSynchronizer.Error = SemaphoreSynchronizerError;
+SemaphoreSynchronizer.OperationCancelledError = SemaphoreSynchronizerOperationCancelledError;
+
+//
+//  Inheritances.
+//
+Util.inherits(SemaphoreSynchronizerError, Error);
+Util.inherits(SemaphoreSynchronizerOperationCancelledError, SemaphoreSynchronizerError);
 
 //  Export public APIs.
 module.exports = {

@@ -9,13 +9,49 @@
 //
 
 //  Imported modules.
-var Events = require("events");
 var CrAsyncPreempt = require("./../asynchronize/preempt");
 var CrSyncConditional = require("./../synchronize/conditional");
+var Events = require("events");
+var Util = require("util");
 
 //  Imported classes.
 var ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
 var EventEmitter = Events.EventEmitter;
+
+//
+//  Classes.
+//
+
+/**
+ *  Event waiter error.
+ * 
+ *  @constructor
+ *  @param {String} [message] - The message.
+ */
+function EventWaiterError(message) {
+    //  Let parent class initialize.
+    if (arguments.length > 0) {
+        Error.call(this, message);
+        this.message = message;
+    } else {
+        Error.call(this);
+        this.message = "Unknown error.";
+    }
+    Error.captureStackTrace(this, this.constructor);
+    this.name = this.constructor.name;
+}
+
+/**
+ *  Event waiter operation cancelled error.
+ * 
+ *  @constructor
+ *  @extends {EventWaiterError}
+ *  @param {String} [message] - The message.
+ */
+function EventWaiterOperationCancelledError(message) {
+    //  Let parent class initialize.
+    EventWaiterError.apply(this, arguments);
+}
 
 //
 //  Private functions.
@@ -42,6 +78,9 @@ function CopyArguments(args) {
 /**
  *  Wait for an event.
  * 
+ *  Exception(s):
+ *    [1] EventWaiterOperationCancelledError - Raised when the cancellator was activated.
+ * 
  *  @param {EventEmitter} handler - The event handler.
  *  @param {String} name - The event name.
  *  @param {ConditionalSynchronizer} [cancellator] - The cancellator.
@@ -51,7 +90,7 @@ async function WaitEvent(handler, name, cancellator) {
     if (arguments.length > 2) {
         //  Check the cancellator state.
         if (cancellator.isFullfilled()) {
-            throw new Error("The cancellator was already activated.");
+            throw new EventWaiterOperationCancelledError("The cancellator was already activated.");
         }
 
         //  Create synchronizers.
@@ -78,11 +117,11 @@ async function WaitEvent(handler, name, cancellator) {
         var wh = rsv.getPromiseObject();
         if (wh == wh1) {
             handler.removeListener(name, _HandleEvent);
-            throw new Error("The cancellator was activated.");
+            throw new EventWaiterOperationCancelledError("The cancellator was activated.");
         } else if (wh == wh2) {
             return rsv.getValue();
         } else {
-            throw new Error("BUG: Invalid wait handler.");
+            throw new EventWaiterError("BUG: Invalid wait handler.");
         }
     } else {
         return await new Promise(function(resolve) {
@@ -93,7 +132,15 @@ async function WaitEvent(handler, name, cancellator) {
     }
 }
 
+//
+//  Inheritances.
+//
+Util.inherits(EventWaiterError, Error);
+Util.inherits(EventWaiterOperationCancelledError, EventWaiterError);
+
 //  Export public APIs.
 module.exports = {
+    "EventWaiterError": EventWaiterError,
+    "EventWaiterOperationCancelledError": EventWaiterOperationCancelledError,
     "WaitEvent": WaitEvent
 };

@@ -11,9 +11,45 @@
 //  Imported modules.
 var CrAsyncTimeout = require("./../asynchronize/timeout");
 var CrSyncConditional = require("./conditional");
+var Util = require("util");
 
 //  Imported classes.
 var ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
+
+//
+//  Classes.
+//
+
+/**
+ *  Poll error.
+ * 
+ *  @constructor
+ *  @param {String} [message] - The message.
+ */
+function PollError(message) {
+    //  Let parent class initialize.
+    if (arguments.length > 0) {
+        Error.call(this, message);
+        this.message = message;
+    } else {
+        Error.call(this);
+        this.message = "Unknown error.";
+    }
+    Error.captureStackTrace(this, this.constructor);
+    this.name = this.constructor.name;
+}
+
+/**
+ *  Poll operation cancelled error.
+ * 
+ *  @constructor
+ *  @extends {PollError}
+ *  @param {String} [message] - The message.
+ */
+function PollOperationCancelledError(message) {
+    //  Let parent class initialize.
+    PollError.apply(this, arguments);
+}
 
 //
 //  Public functions.
@@ -40,6 +76,9 @@ function PollFor(detector, delayMin, delayMax, delayIncreaseRatio, cancellator) 
 /**
  *  (Extend) Poll for a customized condition to be fullfilled.
  * 
+ *  Exception(s):
+ *    [1] PollOperationCancelledError: Raised when the cancellator was activated.
+ * 
  *  @template T
  *  @param {function(): Boolean} detector - The condition detector (return True when the condition was fullfilled).
  *  @param {T} resvData - The data passed to Promise.resolve() method.
@@ -53,7 +92,7 @@ async function PollForEx(detector, resvData, delayMin, delayMax, delayIncreaseRa
     if (arguments.length > 5) {
         //  Check the initial state of the cancellator.
         if (cancellator.isFullfilled()) {
-            throw new Error("The cancellator was already activated.");
+            throw new PollOperationCancelledError("The cancellator was already activated.");
         }
     } else {
         //  Create a cancellator if not set.
@@ -65,7 +104,16 @@ async function PollForEx(detector, resvData, delayMin, delayMax, delayIncreaseRa
 
     //  Wait.
     while(true) {
-        await CrAsyncTimeout.CreateTimeoutPromiseEx(delay, cancellator);
+        try {
+            await CrAsyncTimeout.CreateTimeoutPromiseEx(delay, cancellator);
+        } catch(error) {
+            if (error instanceof CrAsyncTimeout.TimeoutPromiseOperationCancelledError) {
+                throw new PollOperationCancelledError("The cancellator was activated.");
+            } else {
+                //  Generally this won't happen.
+                throw new PollError(error.message || "Unknown error.");
+            }
+        }
         if (detector.call(this)) {
             return resvData;
         }
@@ -73,8 +121,16 @@ async function PollForEx(detector, resvData, delayMin, delayMax, delayIncreaseRa
     }
 }
 
+//
+//  Inheritances.
+//
+Util.inherits(PollError, Error);
+Util.inherits(PollOperationCancelledError, PollError);
+
 //  Export public APIs.
 module.exports = {
+    "PollError": PollError,
+    "PollOperationCancelledError": PollOperationCancelledError,
     "PollFor": PollFor,
     "PollForEx": PollForEx
 };

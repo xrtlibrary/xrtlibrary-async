@@ -11,13 +11,46 @@
 //  Imported modules.
 var CrSyncSemaphore = require("./semaphore");
 var CrSyncConditional = require("./conditional");
+var Util = require("util");
 
 //  Imported classes.
 var ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
+var SemaphoreSynchronizer = CrSyncSemaphore.SemaphoreSynchronizer;
 
 //
 //  Classes.
 //
+
+/**
+ *  Lock synchronizer error.
+ * 
+ *  @constructor
+ *  @param {String} [message] - The message.
+ */
+function LockSynchronizerError(message) {
+    //  Let parent class initialize.
+    if (arguments.length > 0) {
+        Error.call(this, message);
+        this.message = message;
+    } else {
+        Error.call(this);
+        this.message = "Unknown error.";
+    }
+    Error.captureStackTrace(this, this.constructor);
+    this.name = this.constructor.name;
+}
+
+/**
+ *  Lock synchronizer operation cancelled error.
+ * 
+ *  @constructor
+ *  @extends {LockSynchronizerError}
+ *  @param {String} [message] - The message.
+ */
+function LockSynchronizerOperationCancelledError(message) {
+    //  Let parent class initialize.
+    LockSynchronizerError.apply(this, arguments);
+}
 
 /**
  *  Lock synchronizer.
@@ -38,7 +71,7 @@ function LockSynchronizer() {
     //
 
     //  Lock semaphore.
-    var semaphore = new CrSyncSemaphore.SemaphoreSynchronizer(1);
+    var semaphore = new SemaphoreSynchronizer(1);
 
     //
     //  Public methods.
@@ -47,12 +80,24 @@ function LockSynchronizer() {
     /**
      *  Acquire the lock.
      * 
+     *  Exception(s):
+     *    [1] LockSynchronizer.OperationCancelledError: Raised when the cancellator was activated.
+     * 
      *  @param {ConditionalSynchronizer} [cancellator] - The cancellator.
      *  @return {Promise<ConditionalSynchronizer>} - The promise object (release synchronizer will be passed).
      */
     this.acquire = async function(cancellator) {
         if (arguments.length > 0) {
-            await semaphore.wait(cancellator);
+            try {
+                await semaphore.wait(cancellator);
+            } catch(error) {
+                if (error instanceof SemaphoreSynchronizer.OperationCancelledError) {
+                    throw new LockSynchronizerOperationCancelledError(error.message || "The cancellator was activated.");
+                } else {
+                    //  Generally this won't happen.
+                    throw new LockSynchronizerError(error.message || "Unknown error.");
+                }
+            }
         } else {
             await semaphore.wait();
         }
@@ -63,6 +108,14 @@ function LockSynchronizer() {
         return releaser;
     };
 }
+LockSynchronizer.Error = LockSynchronizerError;
+LockSynchronizer.OperationCancelledError = LockSynchronizerOperationCancelledError;
+
+//
+//  Inheritances.
+//
+Util.inherits(LockSynchronizerError, Error);
+Util.inherits(LockSynchronizerOperationCancelledError, LockSynchronizerError);
 
 //  Export public APIs.
 module.exports = {

@@ -179,7 +179,7 @@ function PromiseQueuePopContext(pw, cancellator, receipt) {
 }
 
 /**
- *  Promise queue.
+ *  Promise queue (version 2).
  * 
  *  @template T
  *  @constructor
@@ -283,7 +283,18 @@ function PromiseQueue() {
     //  Properties.
     //
 
-    //  "length" property.
+    /**
+     *  The count of queued items.
+     * 
+     *  Exception(s):
+     *    [1] PromiseQueue.InvalidOperationError: Raised when tries to assign value to this 
+     *                                            property.
+     * 
+     *  @name PromiseQueue#length
+     *  @type {Number}
+     *  @default 0
+     *  @readonly
+     */
     Object.defineProperty(
         self,
         "length",
@@ -467,6 +478,22 @@ PromiseQueue.InvalidOperationError = PromiseQueueInvalidOperationError;
 PromiseQueue.CHANGETYPE_PUSH = PROMISEQUEUE_CHANGETYPE_PUSH;
 PromiseQueue.CHANGETYPE_POP = PROMISEQUEUE_CHANGETYPE_POP;
 PromiseQueue.CHANGETYPE_UNPOP = PROMISEQUEUE_CHANGETYPE_UNPOP;
+
+//
+//  Event definitions.
+//
+
+/**
+ *  Promise queue change event.
+ * 
+ *  Note(s):
+ *    [1] This event would only be emitted when the count of pending items were 
+ *        changed.
+ * 
+ *  @event PromiseQueue#change
+ *  @param {Number} type - The action type (one of PromiseQueue.CHANGETYPE_*).
+ *  @param {*} item - The item related to the action.
+ */
 
 //
 //  Inheritances.

@@ -12,9 +12,45 @@
 var CrAsyncPreempt = require("./preempt");
 var CrSyncConditional = require("./../synchronize/conditional");
 var XRTLibTimer = require("xrtlibrary-timer");
+var Util = require("util");
 
 //  Imported classes.
 var ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
+
+//
+//  Classes.
+//
+
+/**
+ *  Timeout promise error.
+ * 
+ *  @constructor
+ *  @param {String} [message] - The message.
+ */
+function TimeoutPromiseError(message) {
+    //  Let parent class initialize.
+    if (arguments.length > 0) {
+        Error.call(this, message);
+        this.message = message;
+    } else {
+        Error.call(this);
+        this.message = "Unknown error.";
+    }
+    Error.captureStackTrace(this, this.constructor);
+    this.name = this.constructor.name;
+}
+
+/**
+ *  Timeout promise operation cancelled error.
+ * 
+ *  @constructor
+ *  @extends {TimeoutPromiseError}
+ *  @param {String} [message] - The message.
+ */
+function TimeoutPromiseOperationCancelledError(message) {
+    //  Let parent class initialize.
+    TimeoutPromiseError.apply(this, arguments);
+}
 
 //
 //  Public functions.
@@ -38,6 +74,9 @@ function CreateTimeoutPromise(timespan, value) {
 /**
  *  Create a timeout promise which resolves after specific duration (timespan) with a cancellable mechanism.
  * 
+ *  Exception(s):
+ *    [1] TimeoutPromiseOperationCancelledError: Raised when the cancellator was activated.
+ * 
  *  @param {Number} timespan - The duration (timespan).
  *  @param {ConditionalSynchronizer} cancellator - The cancellator.
  *  @param {*} [value] - (Optional) The resolve value.
@@ -46,7 +85,7 @@ function CreateTimeoutPromise(timespan, value) {
 async function CreateTimeoutPromiseEx(timespan, cancellator, value) {
     //  Check the cancellator.
     if (cancellator.isFullfilled()) {
-        throw new Error("The cancellator was already activated.");
+        throw new TimeoutPromiseOperationCancelledError("The cancellator was already activated.");
     }
 
     //  Create a timer.
@@ -73,14 +112,22 @@ async function CreateTimeoutPromiseEx(timespan, cancellator, value) {
     if (wh == wh1) {
         return value;
     } else if (wh == wh2) {
-        throw new Error("The cancellator was activated.");
+        throw new TimeoutPromiseOperationCancelledError("The cancellator was activated.");
     } else {
-        throw new Error("BUG: Invalid wait handler.");
+        throw new TimeoutPromiseError("BUG: Invalid wait handler.");
     }
 }
 
+//
+//  Inheritances.
+//
+Util.inherits(TimeoutPromiseError, Error);
+Util.inherits(TimeoutPromiseOperationCancelledError, TimeoutPromiseError);
+
 //  Export public APIs.
 module.exports = {
+    "TimeoutPromiseError": TimeoutPromiseError,
+    "TimeoutPromiseOperationCancelledError": TimeoutPromiseOperationCancelledError,
     "CreateTimeoutPromise": CreateTimeoutPromise,
     "CreateTimeoutPromiseEx": CreateTimeoutPromiseEx
 };

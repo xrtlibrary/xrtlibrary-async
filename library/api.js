@@ -37,6 +37,8 @@ module.exports = {
             "CreatePreemptivePromise": CrAsyncPreempt.CreatePreemptivePromise
         },
         "Timeout": {
+            "TimeoutPromiseError": CrAsyncTimeout.TimeoutPromiseError,
+            "TimeoutPromiseOperationCancelledError": CrAsyncTimeout.TimeoutPromiseOperationCancelledError,
             "CreateTimeoutPromise": CrAsyncTimeout.CreateTimeoutPromise,
             "CreateTimeoutPromiseEx": CrAsyncTimeout.CreateTimeoutPromiseEx
         },
@@ -45,6 +47,8 @@ module.exports = {
         }
     },
     "Event": {
+        "EventWaiterError": CrEventWaiter.EventWaiterError,
+        "EventWaiterOperationCancelledError": CrEventWaiter.EventWaiterOperationCancelledError,
         "WaitEvent": CrEventWaiter.WaitEvent
     },
     "Promise": {
@@ -70,6 +74,8 @@ module.exports = {
             "SemaphoreSynchronizer": CrSyncSemaphore.SemaphoreSynchronizer
         },
         "Poll": {
+            "PollError": CrSyncPoll.PollError,
+            "PollOperationCancelledError": CrSyncPoll.PollOperationCancelledError,
             "PollFor": CrSyncPoll.PollFor,
             "PollForEx": CrSyncPoll.PollForEx
         }

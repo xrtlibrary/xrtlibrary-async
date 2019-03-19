@@ -32,6 +32,49 @@ var PROMISEQUEUEOP_POP = 1;
 //
 
 /**
+ *  Promise queue error.
+ * 
+ *  @constructor
+ *  @param {String} [message] - The message.
+ */
+function PromiseQueueError(message) {
+    //  Let parent class initialize.
+    if (arguments.length > 0) {
+        Error.call(this, message);
+        this.message = message;
+    } else {
+        Error.call(this);
+        this.message = "Unknown error.";
+    }
+    Error.captureStackTrace(this, this.constructor);
+    this.name = this.constructor.name;
+}
+
+/**
+ *  Promise queue operation cancelled error.
+ * 
+ *  @constructor
+ *  @extends {PromiseQueueError}
+ *  @param {String} [message] - The message.
+ */
+function PromiseQueueOperationCancelledError(message) {
+    //  Let parent class initialize.
+    PromiseQueueError.apply(this, arguments);
+}
+
+/**
+ *  Promise queue invalid operation error.
+ * 
+ *  @constructor
+ *  @extends {PromiseQueueError}
+ *  @param {String} [message] - The message.
+ */
+function PromiseQueueInvalidOperationError(message) {
+    //  Let parent class initialize.
+    PromiseQueueError.apply(this, arguments);
+}
+
+/**
  *  Promise queue item context.
  * 
  *  @template T
@@ -154,6 +197,9 @@ function PromiseQueue() {
     /**
      *  Get an item from the queue.
      * 
+     *  Exception(s):
+     *    [1] PromiseQueue.OperationCancelledError: Raised when the cancellator was activated.
+     * 
      *  @param {ConditionalSynchronizer} [cancellator] - The cancellator.
      *  @return {Promise<T>} - The promise object (resolve with the item, never reject).
      */
@@ -162,7 +208,7 @@ function PromiseQueue() {
             cancellator = new ConditionalSynchronizer();
         } else {
             if (cancellator.isFullfilled()) {
-                return Promise.reject(new Error("The cancellator was already fullfilled."));
+                return Promise.reject(new PromiseQueueOperationCancelledError("The cancellator was already fullfilled."));
             }
         }
         if (pending.length != 0) {
@@ -189,7 +235,7 @@ function PromiseQueue() {
                 waiting.push(ctx);
                 cancellator.waitWithCancellator(cts).then(function() {
                     if (!ctx.isManaged()) {
-                        _reject(new Error("The cancellator was activated."));
+                        _reject(new PromiseQueueOperationCancelledError("The cancellator was activated."));
                     }
                 }, function() {
                     //  Do nothing.
@@ -219,6 +265,9 @@ function PromiseQueue() {
      * 
      *        To avoid this situation, use get([cancellator]) method instead.
      * 
+     *  Exception(s):
+     *    [1] PromiseQueue:InvalidOperationError: Raised when this queue is empty.
+     * 
      *  @return {T} - The item.
      */
     this.getSync = function() {
@@ -230,7 +279,7 @@ function PromiseQueue() {
             }
             return item;
         } else {
-            throw new Error("No item yet.");
+            throw new PromiseQueueInvalidOperationError("No item yet.");
         }
     };
 
@@ -268,6 +317,11 @@ function PromiseQueue() {
         syncHasPendingItem.unfullfill();
     };
 }
+PromiseQueue.Error = PromiseQueueError;
+PromiseQueue.OperationCancelledError = PromiseQueueOperationCancelledError;
+PromiseQueue.InvalidOperationError = PromiseQueueInvalidOperationError;
+PromiseQueue.CHANGETYPE_POP = PROMISEQUEUEOP_POP;
+PromiseQueue.CHANGETYPE_PUSH = PROMISEQUEUEOP_PUSH;
 
 //
 //  Event definitions.
@@ -277,7 +331,7 @@ function PromiseQueue() {
  *  Promise queue change event.
  * 
  *  Note(s):
- *    [1] This event would only be emitted when the count of pending items was 
+ *    [1] This event would only be emitted when the count of pending items were 
  *        changed.
  *    [2] This event wouldn't be emitted if you put an item and there is already 
  *        some get() operations in waiting (In this situation, the waiting get() 
@@ -292,6 +346,9 @@ function PromiseQueue() {
 //
 //  Inheritances.
 //
+Util.inherits(PromiseQueueError, Error);
+Util.inherits(PromiseQueueOperationCancelledError, PromiseQueueError);
+Util.inherits(PromiseQueueInvalidOperationError, PromiseQueueError);
 Util.inherits(PromiseQueue, EventEmitter);
 
 //  Export public APIs.
