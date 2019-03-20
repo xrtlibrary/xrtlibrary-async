@@ -411,7 +411,7 @@ function PromiseQueue() {
      *  Exception(s):
      *    [1] PromiseQueue.InvalidOperationError: Raised this object is still waiting for a receipt.
      * 
-     *  @type {T} - The item.
+     *  @param {T} item - The item.
      */
     this.unpop = function(item) {
         if (isWaitingReceipt) {
