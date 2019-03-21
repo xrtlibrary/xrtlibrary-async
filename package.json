@@ -8,7 +8,5 @@
   },
   "author": "The XRT Authors.",
   "license": "BSD-3-Clause",
-  "dependencies": {
-    "xrtlibrary-timer": "^1.0.4"
-  }
+  "dependencies": {}
 }

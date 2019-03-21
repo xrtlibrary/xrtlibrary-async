@@ -16,7 +16,7 @@
 //  Imported modules.
 var CrAsyncPreempt = require("./preempt");
 var CrSyncConditional = require("./../synchronize/conditional");
-var XRTLibTimer = require("xrtlibrary-timer");
+var Timers = require("timers");
 var Util = require("util");
 
 //  Imported classes.
@@ -71,9 +71,7 @@ function TimeoutPromiseOperationCancelledError(message) {
  */
 function CreateTimeoutPromise(timespan, value) {
     return new Promise(function(resolve) {
-        XRTLibTimer.SetTimeout(function() {
-            resolve(value);
-        }, timespan);
+        Timers.setTimeout(resolve, timespan, value);
     });
 }
 
@@ -100,7 +98,7 @@ async function CreateTimeoutPromiseEx(timespan, cancellator, value) {
 
     //  Create a timer.
     var timerSync = new ConditionalSynchronizer();
-    var timer = XRTLibTimer.SetTimeout(function() {
+    var timer = Timers.setTimeout(function() {
         timer = null;
         timerSync.fullfill();
     }, timespan);
@@ -115,7 +113,7 @@ async function CreateTimeoutPromiseEx(timespan, cancellator, value) {
     cts.fullfill();
     if (timer !== null) {
         //  Stop the timer.
-        XRTLibTimer.ClearTimeout(timer);
+        Timers.clearTimeout(timer);
         timer = null;
     }
     var wh = rsv.getPromiseObject();
