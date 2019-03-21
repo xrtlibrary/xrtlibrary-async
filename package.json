@@ -1,6 +1,6 @@
 {
   "name": "xrtlibrary-async",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "Asynchronous helpers module of XRT library.",
   "main": "library/api.js",
   "scripts": {
