@@ -5,6 +5,11 @@
 //
 
 //
+//  Introduction:
+//    This module implements several functions that helps you handle events.
+//
+
+//
 //  Imports.
 //
 
@@ -26,6 +31,7 @@ var EventEmitter = Events.EventEmitter;
  *  Event waiter error.
  * 
  *  @constructor
+ *  @extends {Error}
  *  @param {String} [message] - The message.
  */
 function EventWaiterError(message) {
@@ -79,18 +85,22 @@ function CopyArguments(args) {
  *  Wait for an event.
  * 
  *  Exception(s):
- *    [1] EventWaiterOperationCancelledError - Raised when the cancellator was activated.
+ *    [1] EventWaiterOperationCancelledError:
+ *        Raised when the cancellator was activated.
  * 
  *  @param {EventEmitter} handler - The event handler.
  *  @param {String} name - The event name.
  *  @param {ConditionalSynchronizer} [cancellator] - The cancellator.
- *  @return {Promise<Array>} - The promise object (resolves with the event arguments if succeed, rejects when cancelled).
+ *  @return {Promise<Array>} - The promise object (resolves with the event 
+ *                             arguments if succeed, rejects when cancelled).
  */
 async function WaitEvent(handler, name, cancellator) {
     if (arguments.length > 2) {
         //  Check the cancellator state.
         if (cancellator.isFullfilled()) {
-            throw new EventWaiterOperationCancelledError("The cancellator was already activated.");
+            throw new EventWaiterOperationCancelledError(
+                "The cancellator was already activated."
+            );
         }
 
         //  Create synchronizers.
@@ -117,7 +127,9 @@ async function WaitEvent(handler, name, cancellator) {
         var wh = rsv.getPromiseObject();
         if (wh == wh1) {
             handler.removeListener(name, _HandleEvent);
-            throw new EventWaiterOperationCancelledError("The cancellator was activated.");
+            throw new EventWaiterOperationCancelledError(
+                "The cancellator was activated."
+            );
         } else if (wh == wh2) {
             return rsv.getValue();
         } else {

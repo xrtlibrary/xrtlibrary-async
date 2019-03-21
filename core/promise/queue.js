@@ -5,6 +5,11 @@
 //
 
 //
+//  Introduction:
+//    This module implements a asynchronous queue data structure.
+//
+
+//
 //  Imports.
 //
 
@@ -35,6 +40,7 @@ var PROMISEQUEUEOP_POP = 1;
  *  Promise queue error.
  * 
  *  @constructor
+ *  @extends {Error}
  *  @param {String} [message] - The message.
  */
 function PromiseQueueError(message) {
@@ -198,17 +204,21 @@ function PromiseQueue() {
      *  Get an item from the queue.
      * 
      *  Exception(s):
-     *    [1] PromiseQueue.OperationCancelledError: Raised when the cancellator was activated.
+     *    [1] PromiseQueue.OperationCancelledError: 
+     *        Raised when the cancellator was activated.
      * 
      *  @param {ConditionalSynchronizer} [cancellator] - The cancellator.
-     *  @return {Promise<T>} - The promise object (resolve with the item, never reject).
+     *  @return {Promise<T>} - The promise object (resolve with the item, never
+     *                         reject).
      */
     this.get = function(cancellator) {
         if (arguments.length == 0) {
             cancellator = new ConditionalSynchronizer();
         } else {
             if (cancellator.isFullfilled()) {
-                return Promise.reject(new PromiseQueueOperationCancelledError("The cancellator was already fullfilled."));
+                return Promise.reject(new PromiseQueueOperationCancelledError(
+                    "The cancellator was already fullfilled."
+                ));
             }
         }
         if (pending.length != 0) {
@@ -235,7 +245,9 @@ function PromiseQueue() {
                 waiting.push(ctx);
                 cancellator.waitWithCancellator(cts).then(function() {
                     if (!ctx.isManaged()) {
-                        _reject(new PromiseQueueOperationCancelledError("The cancellator was activated."));
+                        _reject(new PromiseQueueOperationCancelledError(
+                            "The cancellator was activated."
+                        ));
                     }
                 }, function() {
                     //  Do nothing.
@@ -266,7 +278,8 @@ function PromiseQueue() {
      *        To avoid this situation, use get([cancellator]) method instead.
      * 
      *  Exception(s):
-     *    [1] PromiseQueue:InvalidOperationError: Raised when this queue is empty.
+     *    [1] PromiseQueue:InvalidOperationError: 
+     *        Raised when this queue is empty.
      * 
      *  @return {T} - The item.
      */
@@ -296,7 +309,8 @@ function PromiseQueue() {
      *  Wait for an item to be available.
      * 
      *  @param {ConditionalSynchronizer} [cancellator] - The cancellator.
-     *  @return {Promise} - The promise object (resolves when available, rejects when cancelled).
+     *  @return {Promise} - The promise object (resolves when available, rejects
+     *                      when cancelled).
      */
     this.wait = function(cancellator) {
         if (arguments.length == 0) {

@@ -5,12 +5,23 @@
 //
 
 //
+//  Introduction:
+//    This module implements a notification synchronizer.
+//
+//  Warning(s):
+//    [1] This module has been deprecated.
+//    [2] The existence of this module is ONLY for compatible. You shall NOT use
+//        any API of this module in new application.
+//
+
+//
 //  Classes.
 //
 
 /**
  *  Notification synchronizer.
  * 
+ *  @deprecated - Use EventEmitter instead.
  *  @template T
  *  @constructor
  */

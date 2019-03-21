@@ -5,12 +5,19 @@
 //
 
 //
+//  Introduction:
+//    This module contains several functions that can help you create asynchron-
+//    ous program flows, including:
+//
+//      - for statement.
+//      - while statement.
+//      - do...while statement.
+//
 //  Warning(s):
 //    [1] This module has been deprecated.
-//    [2] The existence of this module is ONLY for compatible. You shall NOT 
-//        use any API of this module in new application.
-//    [3] Use JavaScript's native async/await mechanism to replace this mod-
-//        ule.
+//    [2] The existence of this module is ONLY for compatible. You shall NOT use
+//        any API of this module in new application.
+//    [3] Use JavaScript's native async/await mechanism to replace this module.
 //
 
 //
@@ -21,14 +28,16 @@
  *  Run a loop asynchronously.
  * 
  *  @deprecated Use JavaScript's native async/await mechanism instead.
- *  @param {function(): Promise} fn - The loop function.
+ *  @param {() => Promise} fn - The loop function.
  *  @return {Promise} - The promise object.
  */
 async function RunAsynchronousLoop(fn) {
     while(true) {
         var cycle = fn();
         if (!(cycle instanceof Promise)) {
-            throw new Error("The loop function didn't return a Promise object.");
+            throw new Error(
+                "The loop function didn't return a Promise object."
+            );
         }
         await cycle;
     }

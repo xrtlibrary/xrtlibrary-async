@@ -5,6 +5,11 @@
 //
 
 //
+//  Introduction:
+//    This module implements asynchronous lock (mutex).
+//
+
+//
 //  Imports.
 //
 
@@ -25,6 +30,7 @@ var SemaphoreSynchronizer = CrSyncSemaphore.SemaphoreSynchronizer;
  *  Lock synchronizer error.
  * 
  *  @constructor
+ *  @extends {Error}
  *  @param {String} [message] - The message.
  */
 function LockSynchronizerError(message) {

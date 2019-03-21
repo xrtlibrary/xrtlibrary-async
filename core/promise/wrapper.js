@@ -5,6 +5,12 @@
 //
 
 //
+//  Introduction:
+//    This module implements a wrapper to wrap the resolve/reject functions of a
+//    Promise object.
+//
+
+//
 //  Classes.
 //
 
@@ -14,7 +20,7 @@
  *  @constructor
  *  @template T
  *  @param {(value: T) => void} resolve - The resolve function.
- *  @param {(reason: *)} reject - The reject function.
+ *  @param {(reason: *) => void} reject - The reject function.
  */
 function PromiseWrapper(resolve, reject) {
     //
@@ -33,7 +39,7 @@ function PromiseWrapper(resolve, reject) {
     /**
      *  Get the reject function.
      * 
-     *  @return {(reason: *)} - The reject function.
+     *  @return {(reason: *) => void} - The reject function.
      */
     this.getRejectFunction = function() {
         return reject;

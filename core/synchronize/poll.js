@@ -5,6 +5,11 @@
 //
 
 //
+//  Introduction:
+//    This module implements a poll-based event waiter.
+//
+
+//
 //  Imports.
 //
 
@@ -58,12 +63,12 @@ function PollOperationCancelledError(message) {
 /**
  *  Poll for a customized condition to be fullfilled.
  * 
- *  @param {function(): Boolean} detector - The condition detector (return True when the condition was fullfilled).
+ *  @param {() => Boolean} detector - The condition detector (return True when the condition was fullfilled).
  *  @param {Number} delayMin - The minimum detect interval (must larger than 0).
  *  @param {Number} delayMax - The maximum detect interval.
  *  @param {Number} delayIncreaseRatio - The increase ratio of the detect interval.
  *  @param {ConditionalSynchronizer} [cancellator] - The cancellator.
- *  @return {Promise} - The promise object.
+ *  @return {Promise} - The promise object (resolves when the condition fullfilled, rejects if the cancellator was activated).
  */
 function PollFor(detector, delayMin, delayMax, delayIncreaseRatio, cancellator) {
     if (arguments.length > 4) {
@@ -80,13 +85,13 @@ function PollFor(detector, delayMin, delayMax, delayIncreaseRatio, cancellator) 
  *    [1] PollOperationCancelledError: Raised when the cancellator was activated.
  * 
  *  @template T
- *  @param {function(): Boolean} detector - The condition detector (return True when the condition was fullfilled).
+ *  @param {() => Boolean} detector - The condition detector (return True when the condition was fullfilled).
  *  @param {T} resvData - The data passed to Promise.resolve() method.
  *  @param {Number} delayMin - The minimum detect interval (must larger than 0).
  *  @param {Number} delayMax - The maximum detect interval.
  *  @param {Number} delayIncreaseRatio - The increase ratio of the detect interval.
  *  @param {ConditionalSynchronizer} [cancellator] - The cancellator.
- *  @return {Promise<T>} - The promise object.
+ *  @return {Promise<T>} - The promise object (resolves when the condition fullfilled, rejects if the cancellator was activated).
  */
 async function PollForEx(detector, resvData, delayMin, delayMax, delayIncreaseRatio, cancellator) {
     if (arguments.length > 5) {

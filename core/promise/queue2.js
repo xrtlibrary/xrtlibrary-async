@@ -5,6 +5,12 @@
 //
 
 //
+//  Introduction:
+//    This module implements a asynchronous queue data structure (improved vers-
+//    ion).
+//
+
+//
 //  Imports.
 //
 
@@ -37,6 +43,7 @@ var PROMISEQUEUE_CHANGETYPE_UNPOP = 2;
  *  Promise queue error.
  * 
  *  @constructor
+ *  @extends {Error}
  *  @param {String} [message] - The message.
  */
 function PromiseQueueError(message) {
@@ -300,8 +307,8 @@ function PromiseQueue() {
      *  The count of queued items.
      * 
      *  Exception(s):
-     *    [1] PromiseQueue.InvalidOperationError: Raised when tries to assign value to this 
-     *                                            property.
+     *    [1] PromiseQueue.InvalidOperationError: 
+     *        Raised when tries to assign value to this property.
      * 
      *  @name PromiseQueue#length
      *  @type {Number}
@@ -316,7 +323,9 @@ function PromiseQueue() {
                 return queueItems.length;
             },
             set: function() {
-                throw new PromiseQueueInvalidOperationError("The \"length\" property can not be set.");
+                throw new PromiseQueueInvalidOperationError(
+                    "The \"length\" property can not be set."
+                );
             }
         }
     );
@@ -338,10 +347,12 @@ function PromiseQueue() {
      *  Pop an item asynchronously.
      * 
      *  Exception(s):
-     *    [1] PromiseQueue.OperationCancelledError: Raised when the cancellator was activated.
+     *    [1] PromiseQueue.OperationCancelledError: 
+     *        Raised when the cancellator was activated.
      * 
      *  @param {ConditionalSynchronizer} [cancellator] - The cancellator.
-     *  @return {Promise<T>} - The promise object (resolves with the item when succeed, rejects when error occurred).
+     *  @return {Promise<T>} - The promise object (resolves with the item when 
+     *                         succeed, rejects when error occurred).
      */
     this.pop = function(cancellator) {
         if (arguments.length == 0) {
@@ -355,17 +366,21 @@ function PromiseQueue() {
      *  Pop an item asynchronously with receipt mechanism.
      * 
      *  Exception(s):
-     *    [1] PromiseQueue.OperationCancelledError: Raised when the cancellator was activated.
+     *    [1] PromiseQueue.OperationCancelledError: 
+     *        Raised when the cancellator was activated.
      * 
      *  @param {?PromiseQueueReceipt} receipt - The receipt (NULL if not set).
      *  @param {ConditionalSynchronizer} [cancellator] - The cancellator.
-     *  @return {Promise<T>} - The promise object (resolves with the item when succeed, rejects when error occurred).
+     *  @return {Promise<T>} - The promise object (resolves with the item when 
+     *                         succeed, rejects when error occurred).
      */
     this.popWithReceipt = function(receipt, cancellator) {
         //  Check the cancellator.
         if (arguments.length > 1) {
             if (cancellator.isFullfilled()) {
-                return Promise.reject(new PromiseQueueOperationCancelledError("The cancellator was already activated."));
+                return Promise.reject(new PromiseQueueOperationCancelledError(
+                    "The cancellator was already activated."
+                ));
             }
         } else {
             cancellator = new ConditionalSynchronizer();
@@ -406,16 +421,20 @@ function PromiseQueue() {
      *  Unpop an item.
      * 
      *  Note(s):
-     *    [1] This method can't be called when this object is waiting for a receipt.
+     *    [1] This method can't be called when this object is waiting for a rec-
+     *        eipt.
      * 
      *  Exception(s):
-     *    [1] PromiseQueue.InvalidOperationError: Raised this object is still waiting for a receipt.
+     *    [1] PromiseQueue.InvalidOperationError: 
+     *        Raised this object is still waiting for a receipt.
      * 
      *  @param {T} item - The item.
      */
     this.unpop = function(item) {
         if (isWaitingReceipt) {
-            throw new PromiseQueueInvalidOperationError("Unable to unpop when this object is waiting for a receipt.");
+            throw new PromiseQueueInvalidOperationError(
+                "Unable to unpop when this object is waiting for a receipt."
+            );
         }
         _QueueItems_Unpop(item);
     };

@@ -5,6 +5,11 @@
 //
 
 //
+//  Introduction:
+//    This module implements asynchronous delay functions.
+//
+
+//
 //  Imports.
 //
 
@@ -25,6 +30,7 @@ var ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
  *  Timeout promise error.
  * 
  *  @constructor
+ *  @extends {Error}
  *  @param {String} [message] - The message.
  */
 function TimeoutPromiseError(message) {
@@ -59,8 +65,8 @@ function TimeoutPromiseOperationCancelledError(message) {
 /**
  *  Create a timeout promise which resolves after specific duration (timespan).
  * 
- *  @param {Number} timespan - The duration (timespan).
- *  @param {*} [value] - (Optional) The resolve value.
+ *  @param {Number} timespan - The duration (timespan, unit: milliseconds).
+ *  @param {*} [value] - The resolve value.
  *  @return {Promise} - The promise object.
  */
 function CreateTimeoutPromise(timespan, value) {
@@ -72,20 +78,24 @@ function CreateTimeoutPromise(timespan, value) {
 }
 
 /**
- *  Create a timeout promise which resolves after specific duration (timespan) with a cancellable mechanism.
+ *  Create a timeout promise which resolves after specific duration (timespan) 
+ *  with a cancellable mechanism.
  * 
  *  Exception(s):
- *    [1] TimeoutPromiseOperationCancelledError: Raised when the cancellator was activated.
+ *    [1] TimeoutPromiseOperationCancelledError: 
+ *        Raised when the cancellator was activated.
  * 
- *  @param {Number} timespan - The duration (timespan).
+ *  @param {Number} timespan - The duration (timespan, unit: milliseconds).
  *  @param {ConditionalSynchronizer} cancellator - The cancellator.
- *  @param {*} [value] - (Optional) The resolve value.
+ *  @param {*} [value] - The resolve value.
  *  @return {Promise} - The promise object (reject when cancelled).
  */
 async function CreateTimeoutPromiseEx(timespan, cancellator, value) {
     //  Check the cancellator.
     if (cancellator.isFullfilled()) {
-        throw new TimeoutPromiseOperationCancelledError("The cancellator was already activated.");
+        throw new TimeoutPromiseOperationCancelledError(
+            "The cancellator was already activated."
+        );
     }
 
     //  Create a timer.
@@ -112,7 +122,9 @@ async function CreateTimeoutPromiseEx(timespan, cancellator, value) {
     if (wh == wh1) {
         return value;
     } else if (wh == wh2) {
-        throw new TimeoutPromiseOperationCancelledError("The cancellator was activated.");
+        throw new TimeoutPromiseOperationCancelledError(
+            "The cancellator was activated."
+        );
     } else {
         throw new TimeoutPromiseError("BUG: Invalid wait handler.");
     }

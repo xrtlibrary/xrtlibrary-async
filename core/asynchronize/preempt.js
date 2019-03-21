@@ -5,6 +5,14 @@
 //
 
 //
+//  Introduction:
+//    The function that this module provides is similar to Promise.race(). But 
+//    instead of returning the resolved value only, this module also gives the 
+//    Promise object so that you can know which asynchronous task finishs the 
+//    first.
+//
+
+//
 //  Classes.
 //
 
@@ -73,15 +81,19 @@ function PreemptReject(reason, promise) {
 //
 
 /**
- *  Create a preemptive promise (the first finish/failed task will take over the promise).
+ *  Create a preemptive promise (the first completed task will take over the 
+ *  promise).
  * 
  *  Note(s):
- *    [1] Generally, when more than one tasks are in settled states, the task which has the 
- *        smallest index in tasks array would be returned. But you shall NOT rely on this. 
+ *    [1] Generally, when more than one tasks are in settled states, the task w-
+ *        hich has the smallest index in tasks array would be returned. But you 
+ *        shall NOT rely on this.
  *        This behavior MAY changes in future releases of this library.
+ *    [2] If the returned promise object rejects, an instance of PreemptReject 
+ *        class would be provided as the reject reason.
  * 
  *  @param {Promise[]} tasks - The tasks.
- *  @return {Promise<PreemptResolve>} - The waterfall promise.
+ *  @return {Promise<PreemptResolve>} - The promise object.
  */
 function CreatePreemptivePromise(tasks) {
     return new Promise(function(resolve, reject) {

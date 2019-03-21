@@ -5,6 +5,10 @@
 //
 
 //
+//  Introduction:
+//    This module contains a helper function that can help you create generic a-
+//    synchronous waterfall program flows.
+//
 //  Warning(s):
 //    [1] This module has been deprecated.
 //    [2] The existence of this module is ONLY for compatible. You shall NOT 
@@ -21,9 +25,11 @@
  *  Create a waterfall promise.
  * 
  *  @deprecated Use JavaScript's native async/await mechanism instead.
- *  @param {(function(): Promise)[]} tasks - The tasks.
- *  @param {Boolean} [strictMode] - True if a task function must return with a Promise object.
- *  @return {Promise} - The waterfall promise (resolve with the the value of the lastest task).
+ *  @param {(() => Promise)[]} tasks - The tasks.
+ *  @param {Boolean} [strictMode] - True if a task function must return with a 
+ *                                  Promise object.
+ *  @return {Promise} - The waterfall promise (resolve with the the value of the
+ *                      lastest task).
  */
 async function CreateWaterfallPromise(tasks, strictMode) {
     var lastest = undefined;
@@ -36,7 +42,9 @@ async function CreateWaterfallPromise(tasks, strictMode) {
             }
         }
         if (!(task instanceof Promise)) {
-            throw new Error("Task is neither a Promise object nor undefined/null.");
+            throw new Error(
+                "Task is neither a Promise object nor undefined/null."
+            );
         }
         lastest = await task;
     }
