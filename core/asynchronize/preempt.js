@@ -85,8 +85,8 @@ function PreemptReject(reason, promise) {
  *  promise).
  * 
  *  Note(s):
- *    [1] Generally, when more than one tasks are in settled states, the task w-
- *        hich has the smallest index in tasks array would be returned. But you 
+ *    [1] Generally, when more than one tasks are in settled states, the task 
+ *        which has the smallest index in tasks array would be returned. But you
  *        shall NOT rely on this.
  *        This behavior MAY changes in future releases of this library.
  *    [2] If the returned promise object rejects, an instance of PreemptReject 

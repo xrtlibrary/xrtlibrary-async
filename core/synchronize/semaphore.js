@@ -179,19 +179,18 @@ function SemaphoreSynchronizer(initialCount) {
      *        Raised when the cancellator was activated.
      * 
      *  @param {ConditionalSynchronizer} [cancellator] - The cancellator.
-     *  @return {Promise} - The promise object.
+     *  @return {Promise} - The promise object (resolves if acquired 
+     *                      successfully, rejects if error occurred).
      */
-    this.wait = function(cancellator) {
-        if (arguments.length > 0) {
-            if (cancellator.isFullfilled()) {
-                return Promise.reject(
-                    new SemaphoreSynchronizerOperationCancelledError(
-                        "The cancellator was already activated."
-                    )
-                );
-            }
-        } else {
-            cancellator = new ConditionalSynchronizer();
+    this.wait = function(
+        cancellator = new ConditionalSynchronizer()
+    ) {
+        if (cancellator.isFullfilled()) {
+            return Promise.reject(
+                new SemaphoreSynchronizerOperationCancelledError(
+                    "The cancellator was already activated."
+                )
+            );
         }
         return new Promise(function(resolve, reject) {
             var cts = new CrSyncConditional.ConditionalSynchronizer();
@@ -328,8 +327,10 @@ function SemaphoreSynchronizer(initialCount) {
         }
     });
 }
-SemaphoreSynchronizer.Error = SemaphoreSynchronizerError;
-SemaphoreSynchronizer.OperationCancelledError = SemaphoreSynchronizerOperationCancelledError;
+SemaphoreSynchronizer.Error = 
+    SemaphoreSynchronizerError;
+SemaphoreSynchronizer.OperationCancelledError = 
+    SemaphoreSynchronizerOperationCancelledError;
 
 //
 //  Inheritances.

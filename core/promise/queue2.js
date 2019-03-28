@@ -354,12 +354,10 @@ function PromiseQueue() {
      *  @return {Promise<T>} - The promise object (resolves with the item when 
      *                         succeed, rejects when error occurred).
      */
-    this.pop = function(cancellator) {
-        if (arguments.length == 0) {
-            return self.popWithReceipt(null);
-        } else {
-            return self.popWithReceipt(null, cancellator);
-        }
+    this.pop = function(
+        cancellator = new ConditionalSynchronizer()
+    ) {
+        return self.popWithReceipt(null, cancellator);
     };
 
     /**
@@ -374,19 +372,18 @@ function PromiseQueue() {
      *  @return {Promise<T>} - The promise object (resolves with the item when 
      *                         succeed, rejects when error occurred).
      */
-    this.popWithReceipt = function(receipt, cancellator) {
+    this.popWithReceipt = function(
+        receipt, 
+        cancellator = new ConditionalSynchronizer()
+    ) {
         //  Check the cancellator.
-        if (arguments.length > 1) {
-            if (cancellator.isFullfilled()) {
-                return Promise.reject(new PromiseQueueOperationCancelledError(
-                    "The cancellator was already activated."
-                ));
-            }
-        } else {
-            cancellator = new ConditionalSynchronizer();
+        if (cancellator.isFullfilled()) {
+            return Promise.reject(new PromiseQueueOperationCancelledError(
+                "The cancellator was already activated."
+            ));
         }
 
-        return new Promise(function(_resolve, _reject) {
+        return new Promise(function(resolve, reject) {
             //  Create a cancellation token.
             var cts = new ConditionalSynchronizer();
 
@@ -394,11 +391,11 @@ function PromiseQueue() {
             var pw = new PromiseWrapper(
                 function(value) {
                     cts.fullfill();
-                    _resolve(value);
+                    resolve(value);
                 }, 
                 function(reason) {
                     cts.fullfill();
-                    _reject(reason);
+                    reject(reason);
                 }
             );
 
@@ -409,7 +406,12 @@ function PromiseQueue() {
             //  Monitor the cancellator.
             cancellator.waitWithCancellator(cts).then(function() {
                 if (!ctx.isManaged()) {
-                    pw.getRejectFunction().call(this, new PromiseQueueOperationCancelledError("The cancellator was activated."));
+                    pw.getRejectFunction().call(
+                        this, 
+                        new PromiseQueueOperationCancelledError(
+                            "The cancellator was activated."
+                        )
+                    );
                 }
             }, function() {
                 //  Do nothing.
@@ -484,7 +486,10 @@ function PromiseQueue() {
                 var cts = new ConditionalSynchronizer();
                 var wh1 = syncHasItem.waitWithCancellator(cts);
                 var wh2 = popContextCancellator.waitWithCancellator(cts);
-                var rsv = await CrAsyncPreempt.CreatePreemptivePromise([wh1, wh2]);
+                var rsv = await CrAsyncPreempt.CreatePreemptivePromise([
+                    wh1, 
+                    wh2
+                ]);
 
                 //  Handle different signals.
                 cts.fullfill();
@@ -492,7 +497,12 @@ function PromiseQueue() {
                 if (wh == wh1) {
                     continue;
                 } else if (wh == wh2) {
-                    popContextPW.getRejectFunction().call(this, new PromiseQueueOperationCancelledError("The cancellator was activated."));
+                    popContextPW.getRejectFunction().call(
+                        this, 
+                        new PromiseQueueOperationCancelledError(
+                            "The cancellator was activated."
+                        )
+                    );
                     break;
                 } else {
                     throw new PromiseQueueError("BUG: Invalid wait handler.");
@@ -514,9 +524,14 @@ function PromiseQueue() {
 
                 //  Wait for signals.
                 var cts = new ConditionalSynchronizer();
-                var wh1 = popContextReceipt.getAcceptSynchronizer().waitWithCancellator(cts);
-                var wh2 = popContextReceipt.getDeclineSynchronizer().waitWithCancellator(cts);
-                var rsv = await CrAsyncPreempt.CreatePreemptivePromise([wh1, wh2]);
+                var wh1 = popContextReceipt.getAcceptSynchronizer(
+                ).waitWithCancellator(cts);
+                var wh2 = popContextReceipt.getDeclineSynchronizer(
+                ).waitWithCancellator(cts);
+                var rsv = await CrAsyncPreempt.CreatePreemptivePromise([
+                    wh1, 
+                    wh2
+                ]);
 
                 //  Handle different signals.
                 try {
@@ -528,14 +543,17 @@ function PromiseQueue() {
                         //  Give back the item.
                         _QueueItems_Unpop(popItem);
                     } else {
-                        throw new PromiseQueueError("BUG: Invalid wait handler.");
+                        throw new PromiseQueueError(
+                            "BUG: Invalid wait handler."
+                        );
                     }
                 } finally {
                     //  Mark as not waited for the receipt.
                     isWaitingReceipt = false;
 
                     //  Mark that we acknowledged the receipt.
-                    popContextReceipt.getReceiptAcknowledgeSynchronizer().fullfill();
+                    popContextReceipt.getReceiptAcknowledgeSynchronizer(
+                    ).fullfill();
                 }
             }
         }

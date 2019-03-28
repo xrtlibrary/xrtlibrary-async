@@ -208,18 +208,16 @@ function PromiseQueue() {
      *        Raised when the cancellator was activated.
      * 
      *  @param {ConditionalSynchronizer} [cancellator] - The cancellator.
-     *  @return {Promise<T>} - The promise object (resolve with the item, never
-     *                         reject).
+     *  @return {Promise<T>} - The promise object (resolves with the item if 
+     *                         succeed, rejects if error occurred).
      */
-    this.get = function(cancellator) {
-        if (arguments.length == 0) {
-            cancellator = new ConditionalSynchronizer();
-        } else {
-            if (cancellator.isFullfilled()) {
-                return Promise.reject(new PromiseQueueOperationCancelledError(
-                    "The cancellator was already fullfilled."
-                ));
-            }
+    this.get = function(
+        cancellator = new ConditionalSynchronizer()
+    ) {
+        if (cancellator.isFullfilled()) {
+            return Promise.reject(new PromiseQueueOperationCancelledError(
+                "The cancellator was already fullfilled."
+            ));
         }
         if (pending.length != 0) {
             var item = pending.shift();
@@ -310,14 +308,12 @@ function PromiseQueue() {
      * 
      *  @param {ConditionalSynchronizer} [cancellator] - The cancellator.
      *  @return {Promise} - The promise object (resolves when available, rejects
-     *                      when cancelled).
+     *                      if error occurred).
      */
-    this.wait = function(cancellator) {
-        if (arguments.length == 0) {
-            return syncHasPendingItem.wait();
-        } else {
-            return syncHasPendingItem.waitWithCancellator(cancellator);
-        }
+    this.wait = function(
+        cancellator = new ConditionalSynchronizer()
+    ) {
+        return syncHasPendingItem.waitWithCancellator(cancellator);
     };
 
     /**

@@ -66,10 +66,11 @@ function TimeoutPromiseOperationCancelledError(message) {
  *  Create a timeout promise which resolves after specific duration (timespan).
  * 
  *  @param {Number} timespan - The duration (timespan, unit: milliseconds).
- *  @param {*} [value] - The resolve value.
- *  @return {Promise} - The promise object.
+ *  @param {*} [value] - The resolve value (default = null).
+ *  @return {Promise} - The promise object (resolves when timeouted, never 
+ *                      rejects).
  */
-function CreateTimeoutPromise(timespan, value) {
+function CreateTimeoutPromise(timespan, value = null) {
     return new Promise(function(resolve) {
         Timers.setTimeout(resolve, timespan, value);
     });
@@ -85,10 +86,11 @@ function CreateTimeoutPromise(timespan, value) {
  * 
  *  @param {Number} timespan - The duration (timespan, unit: milliseconds).
  *  @param {ConditionalSynchronizer} cancellator - The cancellator.
- *  @param {*} [value] - The resolve value.
- *  @return {Promise} - The promise object (reject when cancelled).
+ *  @param {*} [value] - The resolve value (default = null).
+ *  @return {Promise} - The promise object (resolves when timeouted, rejects if 
+ *                      error occurred).
  */
-async function CreateTimeoutPromiseEx(timespan, cancellator, value) {
+async function CreateTimeoutPromiseEx(timespan, cancellator, value = null) {
     //  Check the cancellator.
     if (cancellator.isFullfilled()) {
         throw new TimeoutPromiseOperationCancelledError(

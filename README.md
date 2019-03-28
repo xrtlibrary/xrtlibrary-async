@@ -307,10 +307,10 @@ Create a timeout promise which resolves after specific duration (timespan).
 
 <u>Parameter(s)</u>:
  - timespan (*Number*): The duration (timespan, unit: milliseconds).
- - value (*): (Optional) The resolve value.
+ - value (*): (Optional) The resolve value (default = null).
 
 <u>Return value</u>:
- - (*Promise*) The promise object.
+ - (*Promise*) The promise object (resolves when timeouted, never rejects).
 
 <u>Example</u>:
 ```
@@ -331,10 +331,10 @@ Create a timeout promise which resolves after specific duration (timespan) with 
 <u>Parameter(s)</u>:
  - timespan (*Number*): The duration (timespan, unit: milliseconds).
  - cancellator (*Synchronize.Conditional.ConditionalSynchronizer*): The cancellator.
- - value (*): (Optional) The resolve value.
+ - value (*): (Optional) The resolve value (default = null).
 
 <u>Return value</u>:
- - (*Promise*) The promise object(reject when cancelled).
+ - (*Promise*) The promise object (resolves when timeouted, rejects if error occurred).
 
 <u>Example</u>:
 ```
@@ -388,7 +388,7 @@ Wait for an event.
  - cancellator (*Synchronize.Conditional.ConditionalSynchronizer*): (Optional) The cancellator.
 
 <u>Return value</u>:
- - (*Promise&lt;Array&gt;*) The promise object (resolves with the event arguments if succeed, rejects when cancelled).
+ - (*Promise&lt;Array&gt;*) The promise object (resolves with the event arguments if succeed, rejects if error occurred).
 
 <u>Example</u>:
 ```
@@ -493,6 +493,9 @@ Get an item from the queue.
 <u>Parameter(s)</u>:
  - cancellator (*Synchronize.Conditional.ConditionalSynchronizer*): (Optional) The cancellator.
 
+<u>Return value</u>:
+ - (*Promise&lt;T&gt;*) The promise object (resolves with the item if succeed, rejects if error occurred).
+
 <u>Example</u>:
 ```
 var queue = new XRTLibAsync.Promise.PromiseQueue();
@@ -536,7 +539,7 @@ Wait for an item to be available.
  - cancellator (*Synchronize.Conditional.ConditionalSynchronizer*): (Optional) The cancellator.
 
 <u>Return value</u>:
- - The promise object (resolves when available, rejects when cancelled).
+ - The promise object (resolves when available, rejects if error occurred).
 
 ##### pq.clear()
 
@@ -847,7 +850,7 @@ Mark the condition as fullfilled.
  - If the synchronizer has already been fullfilled, calling to this method would be ignored.
 
 <u>Parameter(s)</u>:
- - data (*T*): The data.
+ - data (*T*): The data (default = null).
 
 ##### cs.unfullfill()
 
@@ -912,7 +915,7 @@ Construct a new object.
 <u>Parameter(s)</u>:
  - total (*Number*): The condition count.
  - initial (*Number*): The initial condition index.
- - initialData (*T*): (Optional) The initial promise data.
+ - initialData (*T*): (Optional) The initial promise data (default = null).
 
 ##### mcs.wait(index)
 
@@ -954,7 +957,7 @@ Switch to specific condition.
 
 <u>Parameter(s)</u>:
  - index (*Number*): The condition index.
- - data (*T*): The fullfill data.
+ - data (*T*): The fullfill data (default = null).
 
 ##### mcs.getCurrent()
 
@@ -1006,7 +1009,7 @@ Wait for the condition to be fullfilled with a cancellable mechanism.
 Mark the condition as fullfilled.
 
 <u>Parameter(s)</u>:
- - data (*T*): The data.
+ - data (*T*): The data (default = null).
 
 ### (Module) Synchronize.Lock
 
@@ -1204,7 +1207,7 @@ Do wait (*P*) operation.
  - cancellator (*Synchronize.Conditional.ConditionalSynchronizer*): The cancellator.
 
 <u>Return value</u>:
- - (*Promise*) The promise object.
+ - (*Promise*) The promise object (resolves if acquired successfully, rejects if error occurred).
 
 ##### semaphore.signal()
 

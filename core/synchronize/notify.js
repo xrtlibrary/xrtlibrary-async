@@ -62,8 +62,7 @@ function NotificationSynchronizer() {
     /**
      *  Notify all callbacks.
      */
-    this.notify = function() {
-        var args = arguments;
+    this.notify = function(...args) {
         targets.forEach(function(fn) {
             fn.apply(this, args);
         });

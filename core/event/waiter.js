@@ -92,55 +92,51 @@ function CopyArguments(args) {
  *  @param {String} name - The event name.
  *  @param {ConditionalSynchronizer} [cancellator] - The cancellator.
  *  @return {Promise<Array>} - The promise object (resolves with the event 
- *                             arguments if succeed, rejects when cancelled).
+ *                             arguments if succeed, rejects if error occurred).
  */
-async function WaitEvent(handler, name, cancellator) {
-    if (arguments.length > 2) {
-        //  Check the cancellator state.
-        if (cancellator.isFullfilled()) {
-            throw new EventWaiterOperationCancelledError(
-                "The cancellator was already activated."
-            );
-        }
+async function WaitEvent(
+    handler, 
+    name, 
+    cancellator = new ConditionalSynchronizer()
+) {
+    //  Check the cancellator state.
+    if (cancellator.isFullfilled()) {
+        throw new EventWaiterOperationCancelledError(
+            "The cancellator was already activated."
+        );
+    }
 
-        //  Create synchronizers.
-        var syncEvent = new ConditionalSynchronizer();
+    //  Create synchronizers.
+    var syncEvent = new ConditionalSynchronizer();
 
-        /**
-         *  Handle the event.
-         */
-        function _HandleEvent() {
-            syncEvent.fullfill(CopyArguments(arguments));
-        }
+    /**
+     *  Handle the event.
+     */
+    function _HandleEvent() {
+        syncEvent.fullfill(CopyArguments(arguments));
+    }
 
-        //  Wait for the event.
-        handler.once(name, _HandleEvent);
+    //  Wait for the event.
+    handler.once(name, _HandleEvent);
 
-        //  Wait for signals.
-        var cts = new ConditionalSynchronizer();
-        var wh1 = cancellator.waitWithCancellator(cts);
-        var wh2 = syncEvent.waitWithCancellator(cts);
-        var rsv = await CrAsyncPreempt.CreatePreemptivePromise([wh1, wh2]);
+    //  Wait for signals.
+    var cts = new ConditionalSynchronizer();
+    var wh1 = cancellator.waitWithCancellator(cts);
+    var wh2 = syncEvent.waitWithCancellator(cts);
+    var rsv = await CrAsyncPreempt.CreatePreemptivePromise([wh1, wh2]);
 
-        //  Handle different signals.
-        cts.fullfill();
-        var wh = rsv.getPromiseObject();
-        if (wh == wh1) {
-            handler.removeListener(name, _HandleEvent);
-            throw new EventWaiterOperationCancelledError(
-                "The cancellator was activated."
-            );
-        } else if (wh == wh2) {
-            return rsv.getValue();
-        } else {
-            throw new EventWaiterError("BUG: Invalid wait handler.");
-        }
+    //  Handle different signals.
+    cts.fullfill();
+    var wh = rsv.getPromiseObject();
+    if (wh == wh1) {
+        handler.removeListener(name, _HandleEvent);
+        throw new EventWaiterOperationCancelledError(
+            "The cancellator was activated."
+        );
+    } else if (wh == wh2) {
+        return rsv.getValue();
     } else {
-        return await new Promise(function(resolve) {
-            handler.once(name, function() {
-                resolve(CopyArguments(arguments));
-            });
-        });
+        throw new EventWaiterError("BUG: Invalid wait handler.");
     }
 }
 

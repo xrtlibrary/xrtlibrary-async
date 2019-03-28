@@ -20,6 +20,8 @@ var Util = require("util");
 
 //  Imported classes.
 var ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
+var TimeoutPromiseOperationCancelledError = 
+    CrAsyncTimeout.TimeoutPromiseOperationCancelledError;
 
 //
 //  Classes.
@@ -63,45 +65,65 @@ function PollOperationCancelledError(message) {
 /**
  *  Poll for a customized condition to be fullfilled.
  * 
- *  @param {() => Boolean} detector - The condition detector (return True when the condition was fullfilled).
+ *  @param {() => Boolean} detector - The condition detector (return True when 
+ *                                    the condition was fullfilled).
  *  @param {Number} delayMin - The minimum detect interval (must larger than 0).
  *  @param {Number} delayMax - The maximum detect interval.
- *  @param {Number} delayIncreaseRatio - The increase ratio of the detect interval.
+ *  @param {Number} delayIncreaseRatio - The increase ratio of the detect 
+ *                                       interval.
  *  @param {ConditionalSynchronizer} [cancellator] - The cancellator.
- *  @return {Promise} - The promise object (resolves when the condition fullfilled, rejects if the cancellator was activated).
+ *  @return {Promise} - The promise object (resolves when the condition 
+ *                      fullfilled, rejects if error occurred).
  */
-function PollFor(detector, delayMin, delayMax, delayIncreaseRatio, cancellator) {
-    if (arguments.length > 4) {
-        return PollForEx(detector, null, delayMin, delayMax, delayIncreaseRatio, cancellator);
-    } else {
-        return PollForEx(detector, null, delayMin, delayMax, delayIncreaseRatio);
-    }
+function PollFor(
+    detector, 
+    delayMin, 
+    delayMax, 
+    delayIncreaseRatio, 
+    cancellator = new ConditionalSynchronizer()
+) {
+    return PollForEx(
+        detector, 
+        null, 
+        delayMin, 
+        delayMax, 
+        delayIncreaseRatio, 
+        cancellator
+    );
 }
 
 /**
  *  (Extend) Poll for a customized condition to be fullfilled.
  * 
  *  Exception(s):
- *    [1] PollOperationCancelledError: Raised when the cancellator was activated.
+ *    [1] PollOperationCancelledError: 
+ *        Raised when the cancellator was activated.
  * 
  *  @template T
- *  @param {() => Boolean} detector - The condition detector (return True when the condition was fullfilled).
+ *  @param {() => Boolean} detector - The condition detector (return True when 
+ *                                    the condition was fullfilled).
  *  @param {T} resvData - The data passed to Promise.resolve() method.
  *  @param {Number} delayMin - The minimum detect interval (must larger than 0).
  *  @param {Number} delayMax - The maximum detect interval.
- *  @param {Number} delayIncreaseRatio - The increase ratio of the detect interval.
+ *  @param {Number} delayIncreaseRatio - The increase ratio of the detect 
+ *                                       interval.
  *  @param {ConditionalSynchronizer} [cancellator] - The cancellator.
- *  @return {Promise<T>} - The promise object (resolves when the condition fullfilled, rejects if the cancellator was activated).
+ *  @return {Promise<T>} - The promise object (resolves when the condition 
+ *                         fullfilled, rejects if error occurred).
  */
-async function PollForEx(detector, resvData, delayMin, delayMax, delayIncreaseRatio, cancellator) {
-    if (arguments.length > 5) {
-        //  Check the initial state of the cancellator.
-        if (cancellator.isFullfilled()) {
-            throw new PollOperationCancelledError("The cancellator was already activated.");
-        }
-    } else {
-        //  Create a cancellator if not set.
-        cancellator = new ConditionalSynchronizer();
+async function PollForEx(
+    detector, 
+    resvData, 
+    delayMin, 
+    delayMax, 
+    delayIncreaseRatio, 
+    cancellator = new ConditionalSynchronizer()
+) {
+    //  Check the initial state of the cancellator.
+    if (cancellator.isFullfilled()) {
+        throw new PollOperationCancelledError(
+            "The cancellator was already activated."
+        );
     }
 
     //  Configure the initial delay.
@@ -112,8 +134,10 @@ async function PollForEx(detector, resvData, delayMin, delayMax, delayIncreaseRa
         try {
             await CrAsyncTimeout.CreateTimeoutPromiseEx(delay, cancellator);
         } catch(error) {
-            if (error instanceof CrAsyncTimeout.TimeoutPromiseOperationCancelledError) {
-                throw new PollOperationCancelledError("The cancellator was activated.");
+            if (error instanceof TimeoutPromiseOperationCancelledError) {
+                throw new PollOperationCancelledError(
+                    "The cancellator was activated."
+                );
             } else {
                 //  Generally this won't happen.
                 throw new PollError(error.message || "Unknown error.");

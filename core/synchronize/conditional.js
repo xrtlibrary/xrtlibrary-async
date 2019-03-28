@@ -172,9 +172,11 @@ function ConditionalSynchronizer() {
      *    [1] If the synchronizer has already been fullfilled, calling to this 
      *        method would be ignored.
      * 
-     *  @param {T} [data] - The data.
+     *  @param {T} [data] - The data (default = null).
      */
-    this.fullfill = function(data) {
+    this.fullfill = function(
+        data = null
+    ) {
         //  Skip if the condition has already been fullfilled.
         if (fullfilled) {
             return;
@@ -238,10 +240,14 @@ function ConditionalSynchronizer() {
         return fullfillData;
     };
 }
-ConditionalSynchronizer.Error = ConditionalSynchronizerError;
-ConditionalSynchronizer.OperationCancelledError = ConditionalSynchronizerOperationCancelledError;
-ConditionalSynchronizer.InvalidOperationError = ConditionalSynchronizerInvalidOperationError;
-ConditionalSynchronizer.IndexOutOfRangeError = ConditionalSynchronizerIndexOutOfRangeError;
+ConditionalSynchronizer.Error = 
+    ConditionalSynchronizerError;
+ConditionalSynchronizer.OperationCancelledError = 
+    ConditionalSynchronizerOperationCancelledError;
+ConditionalSynchronizer.InvalidOperationError = 
+    ConditionalSynchronizerInvalidOperationError;
+ConditionalSynchronizer.IndexOutOfRangeError = 
+    ConditionalSynchronizerIndexOutOfRangeError;
 
 /**
  *  Wait for all conditional synchronizers to be fullfilled.
@@ -294,9 +300,9 @@ ConditionalSynchronizer.waitAllWithCancellator = async function(
  *  @constructor
  *  @param {Number} total - The condition count.
  *  @param {Number} initial - The initial condition index.
- *  @param {T} [initialData] - The initial promise data.
+ *  @param {T} [initialData] - The initial promise data (default = null).
  */
-function MultiConditionalSynchronzier(total, initial, initialData) {
+function MultiConditionalSynchronzier(total, initial, initialData = null) {
     //
     //  Members.
     //
@@ -389,9 +395,12 @@ function MultiConditionalSynchronzier(total, initial, initialData) {
      *        Raised when the index is out of range.
      * 
      *  @param {Number} - The condition index.
-     *  @param {T} [data] - The fullfill data.
+     *  @param {T} [data] - The fullfill data (default = null).
      */
-    this.switch = function(index, data) {
+    this.switch = function(
+        index, 
+        data = null
+    ) {
         //  Check the index.
         _AssertIndexWithinRange(index);
 
@@ -518,9 +527,11 @@ function AutomateUnlockConditionalSynchronizer() {
     /**
      *  Mark the condition as fullfilled.
      * 
-     *  @param {T} [data] - The data.
+     *  @param {T} [data] - The data (default = null).
      */
-    this.fullfill = function(data) {
+    this.fullfill = function(
+        data = null
+    ) {
         //  Fork and clear the waiting queue.
         /**
          *  @type {Set<(value: ?T) => void>}
@@ -573,7 +584,10 @@ Util.inherits(
 
 //  Export public APIs.
 module.exports = {
-    "ConditionalSynchronizer": ConditionalSynchronizer,
-    "MultiConditionalSynchronzier": MultiConditionalSynchronzier,
-    "AutomateUnlockConditionalSynchronizer": AutomateUnlockConditionalSynchronizer
+    "ConditionalSynchronizer": 
+        ConditionalSynchronizer,
+    "MultiConditionalSynchronzier": 
+        MultiConditionalSynchronzier,
+    "AutomateUnlockConditionalSynchronizer": 
+        AutomateUnlockConditionalSynchronizer
 };
