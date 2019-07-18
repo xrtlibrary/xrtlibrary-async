@@ -18,12 +18,14 @@ var CrAsyncPreempt = require("./../asynchronize/preempt");
 var CrPromiseQueue2 = require("./../promise/queue2");
 var CrPromiseWrapper = require("./../promise/wrapper");
 var CrSyncConditional = require("./../synchronize/conditional");
+var XRTLibBugHandler = require("xrtlibrary-bughandler");
 var Util = require("util");
 
 //  Imported classes.
 var PromiseQueue2 = CrPromiseQueue2.PromiseQueue;
 var PromiseWrapper = CrPromiseWrapper.PromiseWrapper;
 var ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
+var ReportBug = XRTLibBugHandler.ReportBug;
 
 //
 //  Constants.
@@ -309,8 +311,10 @@ function SemaphoreSynchronizer(initialCount) {
                         )
                     );
                 } else {
-                    throw new SemaphoreSynchronizerError(
-                        "BUG: Invalid wait handler."
+                    ReportBug(
+                        "Invalid wait handler", 
+                        true, 
+                        SemaphoreSynchronizerError
                     );
                 }
             } else {

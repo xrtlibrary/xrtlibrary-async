@@ -16,12 +16,14 @@
 //  Imported modules.
 var CrAsyncPreempt = require("./../asynchronize/preempt");
 var CrSyncConditional = require("./../synchronize/conditional");
+var XRTLibBugHandler = require("xrtlibrary-bughandler");
 var Events = require("events");
 var Util = require("util");
 
 //  Imported classes.
 var ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
 var EventEmitter = Events.EventEmitter;
+var ReportBug = XRTLibBugHandler.ReportBug;
 
 //
 //  Classes.
@@ -136,7 +138,7 @@ async function WaitEvent(
     } else if (wh == wh2) {
         return rsv.getValue();
     } else {
-        throw new EventWaiterError("BUG: Invalid wait handler.");
+        ReportBug("Invalid wait handler.", true, EventWaiterError);
     }
 }
 

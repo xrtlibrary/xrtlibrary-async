@@ -16,11 +16,13 @@
 //  Imported modules.
 var CrAsyncPreempt = require("./preempt");
 var CrSyncConditional = require("./../synchronize/conditional");
+var XRTLibBugHandler = require("xrtlibrary-bughandler");
 var Timers = require("timers");
 var Util = require("util");
 
 //  Imported classes.
 var ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
+var ReportBug = XRTLibBugHandler.ReportBug;
 
 //
 //  Classes.
@@ -126,7 +128,7 @@ async function CreateTimeoutPromiseEx(timespan, cancellator, value = null) {
             "The cancellator was activated."
         );
     } else {
-        throw new TimeoutPromiseError("BUG: Invalid wait handler.");
+        ReportBug("Invalid wait handler.", true, TimeoutPromiseError);
     }
 }
 

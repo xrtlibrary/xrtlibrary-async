@@ -18,6 +18,7 @@
 var CrAsyncPreempt = require("./../asynchronize/preempt");
 var CrPromiseWrapper = require("./wrapper");
 var CrSyncConditional = require("./../synchronize/conditional");
+var XRTLibBugHandler = require("xrtlibrary-bughandler");
 var Events = require("events");
 var Util = require("util");
 
@@ -25,6 +26,7 @@ var Util = require("util");
 var PromiseWrapper = CrPromiseWrapper.PromiseWrapper;
 var EventEmitter = Events.EventEmitter;
 var ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
+var ReportBug = XRTLibBugHandler.ReportBug;
 
 //
 //  Constants.
@@ -505,7 +507,7 @@ function PromiseQueue() {
                     );
                     break;
                 } else {
-                    throw new PromiseQueueError("BUG: Invalid wait handler.");
+                    ReportBug("Invalid wait handler.", true, PromiseQueueError);
                 }
             }
             if (popContextCancellator.isFullfilled()) {
@@ -543,8 +545,10 @@ function PromiseQueue() {
                         //  Give back the item.
                         _QueueItems_Unpop(popItem);
                     } else {
-                        throw new PromiseQueueError(
-                            "BUG: Invalid wait handler."
+                        ReportBug(
+                            "Invalid wait handler.", 
+                            true, 
+                            PromiseQueueError
                         );
                     }
                 } finally {
