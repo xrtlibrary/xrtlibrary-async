@@ -9,6 +9,6 @@
   "author": "The XRT Authors.",
   "license": "BSD-3-Clause",
   "dependencies": {
-    "xrtlibrary-bughandler": "^1.0.2"
+    "xrtlibrary-bughandler": "^1.0.3"
   }
 }
