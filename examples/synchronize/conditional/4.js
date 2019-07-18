@@ -9,13 +9,13 @@
 //
 
 //  Imported modules.
-var XRTLibAsync = require("./../../../");
+const XRTLibAsync = require("./../../../");
 
 //
 //  Main entry.
 //
 (function() {
-    var sync = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
+    let sync = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
     sync.fullfill();
     sync.wait().then(function() {
         console.log("This message should be displayed immediately after startup.");

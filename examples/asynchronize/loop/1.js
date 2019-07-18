@@ -9,13 +9,13 @@
 //
 
 //  Imported modules.
-var XRTLibAsync = require("./../../../");
+const XRTLibAsync = require("./../../../");
 
 //
 //  Main entry.
 //
 (function() {
-    var counter = 1;
+    let counter = 1;
     XRTLibAsync.Asynchronize.Loop.RunAsynchronousLoop(function() {
         console.log("Loop entered: " + counter.toString() + " times.");
         if (counter == 5) {

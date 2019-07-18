@@ -9,17 +9,17 @@
 //
 
 //  Imported modules.
-var XRTLibAsync = require("./../../../");
+const XRTLibAsync = require("./../../../");
 
 //
 //  Main entry.
 //
 (function() {
     //  Initialize the variable to be polled.
-    var pollVar = 0;
+    let pollVar = 0;
 
     //  Create a cancellator.
-    var cancellator = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
+    let cancellator = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
 
     //  Set the variable to 1 after one second.
     setTimeout(function() {

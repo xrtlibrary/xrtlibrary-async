@@ -9,14 +9,14 @@
 //
 
 //  Imported modules.
-var XRTLibAsync = require("./../../../");
+const XRTLibAsync = require("./../../../");
 
 //
 //  Main entry.
 //
 (function() {
     //  Create an automate-unlock conditional synchronizer.
-    var sync = new XRTLibAsync.Synchronize.Conditional.AutomateUnlockConditionalSynchronizer();
+    let sync = new XRTLibAsync.Synchronize.Conditional.AutomateUnlockConditionalSynchronizer();
 
     //  Wait...
     sync.wait().then(function() {

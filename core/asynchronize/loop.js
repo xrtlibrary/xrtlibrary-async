@@ -33,7 +33,7 @@
  */
 async function RunAsynchronousLoop(fn) {
     while(true) {
-        var cycle = fn();
+        let cycle = fn();
         if (!(cycle instanceof Promise)) {
             throw new Error(
                 "The loop function didn't return a Promise object."
@@ -54,7 +54,7 @@ async function RunAsynchronousLoop(fn) {
  */
 async function RunAsynchronousForNext(fnCondition, fnNext, fnBody) {
     while(fnCondition()) {
-        var body = fnBody();
+        let body = fnBody();
         if (typeof(body) == "undefined" || body === null) {
             //  Do nothing.
         } else if (body instanceof Promise) {
@@ -76,7 +76,7 @@ async function RunAsynchronousForNext(fnCondition, fnNext, fnBody) {
  */
 async function RunAsynchronousDoWhile(fnCondition, fnBody) {
     do {
-        var body = fnBody();
+        let body = fnBody();
         if (typeof(body) == "undefined" || body === null) {
             //  Do nothing.
         } else if (body instanceof Promise) {

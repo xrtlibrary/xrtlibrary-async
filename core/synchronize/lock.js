@@ -14,13 +14,13 @@
 //
 
 //  Imported modules.
-var CrSyncSemaphore = require("./semaphore");
-var CrSyncConditional = require("./conditional");
-var Util = require("util");
+const CrSyncSemaphore = require("./semaphore");
+const CrSyncConditional = require("./conditional");
+const Util = require("util");
 
 //  Imported classes.
-var ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
-var SemaphoreSynchronizer = CrSyncSemaphore.SemaphoreSynchronizer;
+const ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
+const SemaphoreSynchronizer = CrSyncSemaphore.SemaphoreSynchronizer;
 
 //
 //  Classes.
@@ -79,7 +79,7 @@ function LockSynchronizer() {
     //
 
     //  Lock semaphore.
-    var semaphore = new SemaphoreSynchronizer(1);
+    let semaphore = new SemaphoreSynchronizer(1);
 
     //
     //  Public methods.
@@ -117,7 +117,7 @@ function LockSynchronizer() {
                 );
             }
         }
-        var releaser = new ConditionalSynchronizer();
+        let releaser = new ConditionalSynchronizer();
         releaser.wait().then(function() {
             semaphore.signal();
         });

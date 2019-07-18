@@ -9,14 +9,14 @@
 //
 
 //  Imported modules.
-var XRTLibAsync = require("./../../../");
-var Events = require("events");
+const XRTLibAsync = require("./../../../");
+const Events = require("events");
 
 //
 //  Main entry.
 //
 (async function() {
-    var events = new Events.EventEmitter();
+    let events = new Events.EventEmitter();
     setTimeout(function() {
         events.emit("hello", "Javascript", "is", "good!");
     }, 1000);

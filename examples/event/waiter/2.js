@@ -9,15 +9,15 @@
 //
 
 //  Imported modules.
-var XRTLibAsync = require("./../../../");
-var Events = require("events");
+const XRTLibAsync = require("./../../../");
+const Events = require("events");
 
 //
 //  Main entry.
 //
 (async function() {
-    var events = new Events.EventEmitter();
-    var cancellator = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
+    let events = new Events.EventEmitter();
+    let cancellator = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
     setTimeout(function() {
         events.emit("hello", "Javascript", "is", "good!");
     }, 2000);

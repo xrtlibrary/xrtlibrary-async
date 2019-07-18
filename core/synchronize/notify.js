@@ -35,7 +35,7 @@ function NotificationSynchronizer() {
      * 
      *  @type {Set<((value: T) => void)>}
      */
-    var targets = new Set();
+    let targets = new Set();
 
     //
     //  Public methods.

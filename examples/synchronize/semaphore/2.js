@@ -15,17 +15,17 @@
 //
 
 //  Imported modules.
-var XRTLibAsync = require("./../../../");
+const XRTLibAsync = require("./../../../");
 
 //
 //  Main entry.
 //
 (function() {
     //  Create a semaphore.
-    var sem = new XRTLibAsync.Synchronize.Semaphore.SemaphoreSynchronizer(10);
+    let sem = new XRTLibAsync.Synchronize.Semaphore.SemaphoreSynchronizer(10);
 
     //  Open 100 connections.
-    for (var i = 1; i <= 100; ++i) {
+    for (let i = 1; i <= 100; ++i) {
         (function(connectionID) {
             sem.wait().then(function() {
                 console.log("Connection " + connectionID.toString() + " opened (remaining " + sem.getCount().toString() + ").");

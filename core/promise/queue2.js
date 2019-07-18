@@ -15,27 +15,27 @@
 //
 
 //  Imported modules.
-var CrAsyncPreempt = require("./../asynchronize/preempt");
-var CrPromiseWrapper = require("./wrapper");
-var CrSyncConditional = require("./../synchronize/conditional");
-var XRTLibBugHandler = require("xrtlibrary-bughandler");
-var Events = require("events");
-var Util = require("util");
+const CrAsyncPreempt = require("./../asynchronize/preempt");
+const CrPromiseWrapper = require("./wrapper");
+const CrSyncConditional = require("./../synchronize/conditional");
+const XRTLibBugHandler = require("xrtlibrary-bughandler");
+const Events = require("events");
+const Util = require("util");
 
 //  Imported classes.
-var PromiseWrapper = CrPromiseWrapper.PromiseWrapper;
-var EventEmitter = Events.EventEmitter;
-var ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
-var ReportBug = XRTLibBugHandler.ReportBug;
+const PromiseWrapper = CrPromiseWrapper.PromiseWrapper;
+const EventEmitter = Events.EventEmitter;
+const ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
+const ReportBug = XRTLibBugHandler.ReportBug;
 
 //
 //  Constants.
 //
 
 //  Promise queue "change" event types.
-var PROMISEQUEUE_CHANGETYPE_PUSH = 0;
-var PROMISEQUEUE_CHANGETYPE_POP = 1;
-var PROMISEQUEUE_CHANGETYPE_UNPOP = 2;
+const PROMISEQUEUE_CHANGETYPE_PUSH = 0;
+const PROMISEQUEUE_CHANGETYPE_POP = 1;
+const PROMISEQUEUE_CHANGETYPE_UNPOP = 2;
 
 //
 //  Classes.
@@ -96,9 +96,9 @@ function PromiseQueueReceipt() {
     //
 
     //  Synchronizers.
-    var syncAccept = new ConditionalSynchronizer();
-    var syncDecline = new ConditionalSynchronizer();
-    var syncReceiptAck = new ConditionalSynchronizer();
+    let syncAccept = new ConditionalSynchronizer();
+    let syncDecline = new ConditionalSynchronizer();
+    let syncReceiptAck = new ConditionalSynchronizer();
 
     //
     //  Public methods.
@@ -147,7 +147,7 @@ function PromiseQueuePopContext(pw, cancellator, receipt) {
     //
 
     //  Managed flag.
-    var managed = false;
+    let managed = false;
 
     //
     //  Public methods.
@@ -213,30 +213,30 @@ function PromiseQueue() {
     //
 
     //  Self reference.
-    var self = this;
+    let self = this;
 
     //  Waiting for receipt flag.
-    var isWaitingReceipt = false;
+    let isWaitingReceipt = false;
 
     /**
      *  Pop contexts queue.
      * 
      *  @type {Array<PromiseQueuePopContext>}
      */
-    var queuePopContexts = [];
+    let queuePopContexts = [];
 
     //  Pop contexts queue has item synchronizer.
-    var syncHasPopContext = new ConditionalSynchronizer();
+    let syncHasPopContext = new ConditionalSynchronizer();
     
     /**
      *  Items queue.
      * 
      *  @type {Array<T>}
      */
-    var queueItems = [];
+    let queueItems = [];
 
     //  Items queue has item synchronizer.
-    var syncHasItem = new ConditionalSynchronizer();
+    let syncHasItem = new ConditionalSynchronizer();
 
     //
     //  Private methods.
@@ -248,7 +248,7 @@ function PromiseQueue() {
      *  @return {PromiseQueuePopContext} - The context.
      */
     function _QueuePopContext_Pop() {
-        var ctx = queuePopContexts.shift();
+        let ctx = queuePopContexts.shift();
         if (queuePopContexts.length == 0) {
             syncHasPopContext.unfullfill();
         }
@@ -271,7 +271,7 @@ function PromiseQueue() {
      *  @return {T} - The item.
      */
     function _QueueItems_Pop() {
-        var item = queueItems.shift();
+        let item = queueItems.shift();
         if (queueItems.length == 0) {
             syncHasItem.unfullfill();
         }
@@ -387,10 +387,10 @@ function PromiseQueue() {
 
         return new Promise(function(resolve, reject) {
             //  Create a cancellation token.
-            var cts = new ConditionalSynchronizer();
+            let cts = new ConditionalSynchronizer();
 
             //  Create a promise wrapper.
-            var pw = new PromiseWrapper(
+            let pw = new PromiseWrapper(
                 function(value) {
                     cts.fullfill();
                     resolve(value);
@@ -402,7 +402,7 @@ function PromiseQueue() {
             );
 
             //  Create a pop context.
-            var ctx = new PromiseQueuePopContext(pw, cancellator, receipt);
+            let ctx = new PromiseQueuePopContext(pw, cancellator, receipt);
             _QueuePopContext_Push(ctx);
 
             //  Monitor the cancellator.
@@ -468,34 +468,34 @@ function PromiseQueue() {
             while(!syncHasPopContext.isFullfilled()) {
                 await syncHasPopContext.wait();
             }
-            var popContext = _QueuePopContext_Pop();
+            let popContext = _QueuePopContext_Pop();
 
             //  Mark the pop context as managed.
             popContext.markAsManaged();
 
             //  Check the cancellator.
-            var popContextCancellator = popContext.getCancellator();
+            let popContextCancellator = popContext.getCancellator();
             if (popContextCancellator.isFullfilled()) {
                 continue;
             }
 
             //  Get the promise wrapper.
-            var popContextPW = popContext.getPromiseWrapper();
+            let popContextPW = popContext.getPromiseWrapper();
 
             //  Wait for an item.
             while (!syncHasItem.isFullfilled()) {
                 //  Wait for signals.
-                var cts = new ConditionalSynchronizer();
-                var wh1 = syncHasItem.waitWithCancellator(cts);
-                var wh2 = popContextCancellator.waitWithCancellator(cts);
-                var rsv = await CrAsyncPreempt.CreatePreemptivePromise([
+                let cts = new ConditionalSynchronizer();
+                let wh1 = syncHasItem.waitWithCancellator(cts);
+                let wh2 = popContextCancellator.waitWithCancellator(cts);
+                let rsv = await CrAsyncPreempt.CreatePreemptivePromise([
                     wh1, 
                     wh2
                 ]);
 
                 //  Handle different signals.
                 cts.fullfill();
-                var wh = rsv.getPromiseObject();
+                let wh = rsv.getPromiseObject();
                 if (wh == wh1) {
                     continue;
                 } else if (wh == wh2) {
@@ -513,24 +513,24 @@ function PromiseQueue() {
             if (popContextCancellator.isFullfilled()) {
                 continue;
             }
-            var popItem = _QueueItems_Pop();
+            let popItem = _QueueItems_Pop();
 
             //  Resolves the promise object.
             popContextPW.getResolveFunction().call(this, popItem);
 
             //  Wait for receipt.
-            var popContextReceipt = popContext.getReceipt();
+            let popContextReceipt = popContext.getReceipt();
             if (popContextReceipt) {
                 //  Mark as waiting for receipt.
                 isWaitingReceipt = true;
 
                 //  Wait for signals.
-                var cts = new ConditionalSynchronizer();
-                var wh1 = popContextReceipt.getAcceptSynchronizer(
+                let cts = new ConditionalSynchronizer();
+                let wh1 = popContextReceipt.getAcceptSynchronizer(
                 ).waitWithCancellator(cts);
-                var wh2 = popContextReceipt.getDeclineSynchronizer(
+                let wh2 = popContextReceipt.getDeclineSynchronizer(
                 ).waitWithCancellator(cts);
-                var rsv = await CrAsyncPreempt.CreatePreemptivePromise([
+                let rsv = await CrAsyncPreempt.CreatePreemptivePromise([
                     wh1, 
                     wh2
                 ]);
@@ -538,7 +538,7 @@ function PromiseQueue() {
                 //  Handle different signals.
                 try {
                     cts.fullfill();
-                    var wh = rsv.getPromiseObject();
+                    let wh = rsv.getPromiseObject();
                     if (wh == wh1) {
                         //  Do nothing.
                     } else if (wh == wh2) {

@@ -9,17 +9,17 @@
 //
 
 //  Imported modules.
-var XRTLibAsync = require("./../../../");
+const XRTLibAsync = require("./../../../");
 
 //
 //  Main entry.
 //
 (function() {
     //  Create three conditions.
-    var cancellator = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
-    var sync1 = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
-    var sync2 = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
-    var sync3 = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
+    let cancellator = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
+    let sync1 = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
+    let sync2 = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
+    let sync3 = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
 
     //  Monitor three conditions.
     sync1.wait().then(function() {

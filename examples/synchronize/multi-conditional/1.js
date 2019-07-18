@@ -9,22 +9,22 @@
 //
 
 //  Imported modules.
-var XRTLibAsync = require("./../../../");
+const XRTLibAsync = require("./../../../");
 
 //
 //  Constants.
 //
 
 //  Switch states.
-var SWITCH_ON = 0;
-var SWITCH_OFF = 1;
+const SWITCH_ON = 0;
+const SWITCH_OFF = 1;
 
 //
 //  Main entry.
 //
 (function() {
     //  Create a multi-conditional synchronizer (as a light switch).
-    var sw = new XRTLibAsync.Synchronize.Conditional.MultiConditionalSynchronzier(2, SWITCH_OFF);
+    let sw = new XRTLibAsync.Synchronize.Conditional.MultiConditionalSynchronzier(2, SWITCH_OFF);
 
     //  Trigger the switch (simulate user turns on/off the switch).
     setInterval(function() {

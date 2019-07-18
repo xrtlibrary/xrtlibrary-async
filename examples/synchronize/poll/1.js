@@ -9,14 +9,14 @@
 //
 
 //  Imported modules.
-var XRTLibAsync = require("./../../../");
+const XRTLibAsync = require("./../../../");
 
 //
 //  Main entry.
 //
 (function() {
     //  Initialize the variable to be polled.
-    var pollVar = 0;
+    let pollVar = 0;
 
     //  Set the variable to 1 after one second.
     setTimeout(function() {

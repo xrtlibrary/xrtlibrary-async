@@ -15,27 +15,25 @@
 //
 
 //  Imported modules.
-var XRTLibAsync = require("./../../../");
+const XRTLibAsync = require("./../../../");
 
 //
 //  Main entry.
 //
 (function() {
     //  Create a semaphore.
-    var sem = new XRTLibAsync.Synchronize.Semaphore.SemaphoreSynchronizer(0);
+    let sem = new XRTLibAsync.Synchronize.Semaphore.SemaphoreSynchronizer(0);
 
     //  See the acquiring order.
-    for (var i = 1; i <= 10; ++i) {
-        (function(_i) {
-            sem.wait().then(function() {
-                console.log(_i.toString() + " acquired.");
-            });
-        })(i);
+    for (let i = 1; i <= 10; ++i) {
+        sem.wait().then(function() {
+            console.log(i.toString() + " acquired.");
+        });
     }
 
     //  Give 10 tokens.
     (async function() {
-        for (var i = 0; i < 10; ++i) {
+        for (let i = 0; i < 10; ++i) {
             await XRTLibAsync.Asynchronize.Timeout.CreateTimeoutPromise(500);
             sem.signal();
         }

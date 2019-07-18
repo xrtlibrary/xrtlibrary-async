@@ -14,20 +14,20 @@
 //
 
 //  Imported modules.
-var XRTLibAsync = require("./../../../");
+const XRTLibAsync = require("./../../../");
 
 //
 //  Main entry.
 //
 (function() {
     //  Create two semaphores.
-    var sem1 = new XRTLibAsync.Synchronize.Semaphore.SemaphoreSynchronizer(0);
-    var sem2 = new XRTLibAsync.Synchronize.Semaphore.SemaphoreSynchronizer(0);
+    let sem1 = new XRTLibAsync.Synchronize.Semaphore.SemaphoreSynchronizer(0);
+    let sem2 = new XRTLibAsync.Synchronize.Semaphore.SemaphoreSynchronizer(0);
 
     //  Thread 1.
     setTimeout(async function() {
         console.log("Thread 1 started.");
-        for (var i = 1; i <= 5; ++i) {
+        for (let i = 1; i <= 5; ++i) {
             await sem1.wait();
             console.log("Thread 1: " + i.toString() + ".");
             sem2.signal();
@@ -38,7 +38,7 @@ var XRTLibAsync = require("./../../../");
     //  Thread 2.
     setTimeout(async function() {
         console.log("Thread 2 started.");
-        for (var i = 1; i <= 5; ++i) {
+        for (let i = 1; i <= 5; ++i) {
             sem1.signal();
             await sem2.wait();
             console.log("Thread 2: " + i.toString() + ".");

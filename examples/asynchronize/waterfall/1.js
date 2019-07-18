@@ -9,9 +9,9 @@
 //
 
 //  Imported modules.
-var XRTLibAsync = require("./../../../");
-var FS = require("fs");
-var Path = require("path");
+const XRTLibAsync = require("./../../../");
+const FS = require("fs");
+const Path = require("path");
 
 //
 //  Main entry.

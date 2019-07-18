@@ -15,14 +15,14 @@
 //
 
 //  Imported modules.
-var XRTLibAsync = require("./../../../");
+const XRTLibAsync = require("./../../../");
 
 //
 //  Main entry.
 //
 (function() {
     //  Create a semaphore.
-    var sem = new XRTLibAsync.Synchronize.Semaphore.SemaphoreSynchronizer(1);
+    let sem = new XRTLibAsync.Synchronize.Semaphore.SemaphoreSynchronizer(1);
 
     //  Create task 1.
     {
@@ -37,7 +37,7 @@ var XRTLibAsync = require("./../../../");
 
     //  Create task 2.
     {
-        var cancellator = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
+        let cancellator = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
         sem.wait(cancellator).then(function() {
             //  Never goes here.
             console.log("Task 2 acquired the semaphore.");

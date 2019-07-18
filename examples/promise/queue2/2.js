@@ -9,18 +9,18 @@
 //
 
 //  Imported modules.
-var XRTLibAsync = require("./../../../");
+const XRTLibAsync = require("./../../../");
 
 //
 //  Main entry.
 //
 (function() {
     //  Create a queue.
-    var queue = new XRTLibAsync.Promise.PromiseQueue2();
+    let queue = new XRTLibAsync.Promise.PromiseQueue2();
 
     //  Read the queue asynchronously.
     (async function() {
-        var receipt = new XRTLibAsync.Promise.PromiseQueue2.Receipt();
+        let receipt = new XRTLibAsync.Promise.PromiseQueue2.Receipt();
         console.log(await queue.popWithReceipt(receipt));
         setTimeout(function() {
             console.log("Accepted the receipt.");

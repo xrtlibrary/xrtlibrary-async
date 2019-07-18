@@ -14,23 +14,23 @@
 //
 
 //  Imported modules.
-var CrPromiseWrapper = require("./wrapper");
-var CrSyncConditional = require("./../synchronize/conditional");
-var Events = require("events");
-var Util = require("util");
+const CrPromiseWrapper = require("./wrapper");
+const CrSyncConditional = require("./../synchronize/conditional");
+const Events = require("events");
+const Util = require("util");
 
 //  Imported classes.
-var PromiseWrapper = CrPromiseWrapper.PromiseWrapper;
-var EventEmitter = Events.EventEmitter;
-var ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
+const PromiseWrapper = CrPromiseWrapper.PromiseWrapper;
+const EventEmitter = Events.EventEmitter;
+const ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
 
 //
 //  Constants.
 //
 
 //  Promise queue operations.
-var PROMISEQUEUEOP_PUSH = 0;
-var PROMISEQUEUEOP_POP = 1;
+const PROMISEQUEUEOP_PUSH = 0;
+const PROMISEQUEUEOP_POP = 1;
 
 //
 //  Classes.
@@ -94,7 +94,7 @@ function PromiseQueueItemContext(pw, cancellator) {
     //
 
     //  Managed flag.
-    var managed = false;
+    let managed = false;
 
     //
     //  Public methods.
@@ -155,24 +155,24 @@ function PromiseQueue() {
      * 
      *  @type {PromiseQueue<T>}
      */
-    var self = this;
+    let self = this;
 
     /**
      *  Waiting requests.
      * 
      *  @type {Array<PromiseQueueItemContext<T>>}
      */
-    var waiting = [];
+    let waiting = [];
 
     /**
      *  Pending items.
      * 
      *  @type {Array<T>}
      */
-    var pending = [];
+    let pending = [];
 
     //  Synchronizers.
-    var syncHasPendingItem = new ConditionalSynchronizer();
+    let syncHasPendingItem = new ConditionalSynchronizer();
 
     //
     //  Public methods.
@@ -185,10 +185,10 @@ function PromiseQueue() {
      */
     this.put = function(item) {
         while(waiting.length != 0) {
-            var context = waiting.shift();
+            let context = waiting.shift();
             context.markAsManaged();
-            var pw = context.getPromiseWrapper();
-            var cancellator = context.getCancellator();
+            let pw = context.getPromiseWrapper();
+            let cancellator = context.getCancellator();
             if (cancellator.isFullfilled()) {
                 continue;
             }
@@ -220,7 +220,7 @@ function PromiseQueue() {
             ));
         }
         if (pending.length != 0) {
-            var item = pending.shift();
+            let item = pending.shift();
             self.emit("change", PROMISEQUEUEOP_POP, item);
             if (pending.length == 0) {
                 syncHasPendingItem.unfullfill();
@@ -228,8 +228,8 @@ function PromiseQueue() {
             return Promise.resolve(item);
         } else {
             return new Promise(function(_resolve, _reject) {
-                var cts = new ConditionalSynchronizer();
-                var pw = new PromiseWrapper(
+                let cts = new ConditionalSynchronizer();
+                let pw = new PromiseWrapper(
                     function(value) {
                         cts.fullfill();
                         _resolve(value);
@@ -239,7 +239,7 @@ function PromiseQueue() {
                         _reject(reason);
                     }
                 );
-                var ctx = new PromiseQueueItemContext(pw, cancellator);
+                let ctx = new PromiseQueueItemContext(pw, cancellator);
                 waiting.push(ctx);
                 cancellator.waitWithCancellator(cts).then(function() {
                     if (!ctx.isManaged()) {
@@ -283,7 +283,7 @@ function PromiseQueue() {
      */
     this.getSync = function() {
         if (pending.length != 0) {
-            var item = pending.shift();
+            let item = pending.shift();
             self.emit("change", PROMISEQUEUEOP_POP, item);
             if (pending.length == 0) {
                 syncHasPendingItem.unfullfill();
@@ -321,7 +321,7 @@ function PromiseQueue() {
      */
     this.clear = function() {
         while (pending.length != 0) {
-            var item = pending.shift();
+            let item = pending.shift();
             self.emit("change", PROMISEQUEUEOP_POP, item);
         }
         syncHasPendingItem.unfullfill();

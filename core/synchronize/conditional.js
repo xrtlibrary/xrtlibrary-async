@@ -14,7 +14,7 @@
 //
 
 //  Imported modules.
-var Util = require("util");
+const Util = require("util");
 
 //
 //  Classes.
@@ -88,21 +88,21 @@ function ConditionalSynchronizer() {
     //
 
     //  Fullfilled flag.
-    var fullfilled = false;
+    let fullfilled = false;
 
     /**
      *  Fullfilled data.
      * 
      *  @type {?T}
      */
-    var fullfillData = null;
+    let fullfillData = null;
 
     /**
      *  Resolvers of waiting requests.
      * 
      *  @type {Set<(value: ?T) => void>}
      */
-    var waiting = new Set();
+    let waiting = new Set();
 
     //
     //  Public methods.
@@ -190,7 +190,7 @@ function ConditionalSynchronizer() {
         /**
          *  @type {Set<(value: ?T) => void>}
          */
-        var execution = ForkSet(waiting);
+        let execution = ForkSet(waiting);
         waiting.clear();
 
         //  Call all waiting resolvers.
@@ -257,8 +257,8 @@ ConditionalSynchronizer.IndexOutOfRangeError =
  *                             of the synchronizers).
  */
 ConditionalSynchronizer.waitAll = async function(synchronizers) {
-    var values = [];
-    for (var i = 0; i < synchronizers.length; ++i) {
+    let values = [];
+    for (let i = 0; i < synchronizers.length; ++i) {
         values.push(await (synchronizers[i].wait()));
     }
     return values;
@@ -286,8 +286,8 @@ ConditionalSynchronizer.waitAllWithCancellator = async function(
             "The cancellator has already been activated."
         );
     }
-    var values = [];
-    for (var i = 0; i < synchronizers.length; ++i) {
+    let values = [];
+    for (let i = 0; i < synchronizers.length; ++i) {
         values.push(await (synchronizers[i].waitWithCancellator(cancellator)));
     }
     return values;
@@ -312,10 +312,10 @@ function MultiConditionalSynchronzier(total, initial, initialData = null) {
      * 
      *  @type {Array<ConditionalSynchronizer<T>>}
      */
-    var conditionals = [];
+    let conditionals = [];
 
     //  Current condition index.
-    var current = initial;
+    let current = initial;
 
     //
     //  Private methods.
@@ -445,8 +445,8 @@ function MultiConditionalSynchronzier(total, initial, initialData = null) {
         }
 
         //  Create conditionals.
-        for (var i = 0; i < total; ++i) {
-            var conditional = new ConditionalSynchronizer();
+        for (let i = 0; i < total; ++i) {
+            let conditional = new ConditionalSynchronizer();
             if (i == initial) {
                 conditional.fullfill(initialData);
             }
@@ -471,7 +471,7 @@ function AutomateUnlockConditionalSynchronizer() {
      * 
      *  @type {Set<(value: ?T) => void>}
      */
-    var waiting = new Set();
+    let waiting = new Set();
 
     //
     //  Public methods.
@@ -536,7 +536,7 @@ function AutomateUnlockConditionalSynchronizer() {
         /**
          *  @type {Set<(value: ?T) => void>}
          */
-        var execution = ForkSet(waiting);
+        let execution = ForkSet(waiting);
         waiting.clear();
 
         //  Call all waiting resolvers.
@@ -558,7 +558,7 @@ function AutomateUnlockConditionalSynchronizer() {
  *  @return {Set<T>} - The forked set.
  */
 function ForkSet(origin) {
-    var forked = new Set();
+    let forked = new Set();
     origin.forEach(function(item) {
         forked.add(item);
     });

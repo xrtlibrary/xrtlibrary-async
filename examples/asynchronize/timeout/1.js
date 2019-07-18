@@ -9,13 +9,13 @@
 //
 
 //  Imported modules.
-var XRTLibAsync = require("./../../../");
+const XRTLibAsync = require("./../../../");
 
 //
 //  Main entry.
 //
 (function() {
-    var startupTime = Date.now();
+    let startupTime = Date.now();
     XRTLibAsync.Asynchronize.Timeout.CreateTimeoutPromise(1000).then(function() {
         console.log("Elapsed " + (Date.now() - startupTime).toString() + " milliseconds.");
     });

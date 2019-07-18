@@ -14,13 +14,13 @@
 //
 
 //  Imported modules.
-var CrAsyncTimeout = require("./../asynchronize/timeout");
-var CrSyncConditional = require("./conditional");
-var Util = require("util");
+const CrAsyncTimeout = require("./../asynchronize/timeout");
+const CrSyncConditional = require("./conditional");
+const Util = require("util");
 
 //  Imported classes.
-var ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
-var TimeoutPromiseOperationCancelledError = 
+const ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
+const TimeoutPromiseOperationCancelledError = 
     CrAsyncTimeout.TimeoutPromiseOperationCancelledError;
 
 //
@@ -127,7 +127,7 @@ async function PollForEx(
     }
 
     //  Configure the initial delay.
-    var delay = delayMin;
+    let delay = delayMin;
 
     //  Wait.
     while(true) {

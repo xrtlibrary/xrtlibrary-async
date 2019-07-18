@@ -25,7 +25,7 @@ npm install xrtlibrary-async --save
 Then you can import this library in your JavaScript code:
 
 ```
-var XRTLibAsync = require("xrtlibrary-async");
+const XRTLibAsync = require("xrtlibrary-async");
 ```
 
 ## Examples
@@ -60,7 +60,7 @@ Run a loop asynchronously.
 
 <u>Example</u>:
 ```
-var counter = 0;
+let counter = 0;
 XRTLibAsync.Asynchronize.Loop.RunAsynchronousLoop(function() {
     console.log(++counter);
     return XRTLibAsync.Asynchronize.Timeout.CreateTimeoutPromise(1000);
@@ -75,7 +75,7 @@ XRTLibAsync.Asynchronize.Loop.RunAsynchronousLoop(function() {
 Equivalent using *async/await*:
 
 ````
-var counter = 0;
+let counter = 0;
 while(true) {
     console.log(++counter);
     await XRTLibAsync.Asynchronize.Timeout.CreateTimeoutPromise(1000);
@@ -96,7 +96,7 @@ Run a for-next statement asynchronously.
 
 <u>Example</u>:
 ```
-var i = 1;
+let i = 1;
 XRTLibAsync.Asynchronize.Loop.RunAsynchronousForNext(
     function() {
         return i <= 3;
@@ -118,7 +118,7 @@ XRTLibAsync.Asynchronize.Loop.RunAsynchronousForNext(
 Equivalent using *async/await*:
 
 ```
-for (var i = 1; i <= 3; ++i) {
+for (let i = 1; i <= 3; ++i) {
     console.log(i);
     await XRTLibAsync.Asynchronize.Timeout.CreateTimeoutPromise(1000);
 }
@@ -137,7 +137,7 @@ Run a do-while statement asynchronously.
 
 <u>Example</u>:
 ```
-var i = 1;
+let i = 1;
 XRTLibAsync.Asynchronize.Loop.RunAsynchronousDoWhile(
     function() {
         return i < 1;
@@ -154,7 +154,7 @@ XRTLibAsync.Asynchronize.Loop.RunAsynchronousDoWhile(
 Equivalent using *async/await*:
 
 ```
-var i = 1;
+let i = 1;
 do {
     console.log(i);
     await XRTLibAsync.Asynchronize.Timeout.CreateTimeoutPromise(1000);
@@ -264,11 +264,11 @@ Create a preemptive promise (the first completed task will take over the promise
 
 <u>Example</u>:
 ```
-var p1 = XRTLibAsync.Asynchronize.Timeout.CreateTimeoutPromise(100);    //  This promise object resolves after 100ms.
-var p2 = XRTLibAsync.Asynchronize.Timeout.CreateTimeoutPromise(500);    //  This promise object resolves after 500ms.
-var p3 = XRTLibAsync.Asynchronize.Timeout.CreateTimeoutPromise(1000);   //  This promise object resolves after 1000ms.
-var rsv = await XRTLibAsync.Asynchronize.Preempt.CreatePreemptivePromise([p1, p2, p3]);
-var p = rsv.getPromiseObject();
+let p1 = XRTLibAsync.Asynchronize.Timeout.CreateTimeoutPromise(100);    //  This promise object resolves after 100ms.
+let p2 = XRTLibAsync.Asynchronize.Timeout.CreateTimeoutPromise(500);    //  This promise object resolves after 500ms.
+let p3 = XRTLibAsync.Asynchronize.Timeout.CreateTimeoutPromise(1000);   //  This promise object resolves after 1000ms.
+let rsv = await XRTLibAsync.Asynchronize.Preempt.CreatePreemptivePromise([p1, p2, p3]);
+let p = rsv.getPromiseObject();
 if (p == p1) {
 	console.log("Promise 1 preempted!");
 } else if (p == p2) {
@@ -338,7 +338,7 @@ Create a timeout promise which resolves after specific duration (timespan) with 
 
 <u>Example</u>:
 ```
-var cancellator = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
+let cancellator = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
 XRTLibAsync.Asynchronize.Timeout.CreateTimeoutPromiseEx(5000, cancellator).then(function() {
     throw new Error("Unreachable.");
 }).catch(function(error) {
@@ -392,22 +392,22 @@ Wait for an event.
 
 <u>Example</u>:
 ```
-var server = net.createServer();
-var listenWaitHandler = XRTLibAsync.Event.WaitEvent(server, "listening");
+let server = net.createServer();
+let listenWaitHandler = XRTLibAsync.Event.WaitEvent(server, "listening");
 server.listen(8080);
 await listenWaitHandler;
 console.log("Server listened!");
 ```
 
 ```
-var server = net.createServer();
-var cts = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
-var wh1 = XRTLibAsync.Event.WaitEvent(server, "listening", cts);
-var wh2 = XRTLibAsync.Event.WaitEvent(server, "error", cts);
+let server = net.createServer();
+let cts = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
+let wh1 = XRTLibAsync.Event.WaitEvent(server, "listening", cts);
+let wh2 = XRTLibAsync.Event.WaitEvent(server, "error", cts);
 server.listen(8080);
-var rsv = await XRTLibAsync.Asynchronize.Preempt.CreatePreemptivePromise([wh1, wh2]);
+let rsv = await XRTLibAsync.Asynchronize.Preempt.CreatePreemptivePromise([wh1, wh2]);
 cts.fullfill();
-var wh = rsv.getPromiseObject();
+let wh = rsv.getPromiseObject();
 if (wh == wh1) {
     console.log("Server listened!");
     //  Handle connections here.
@@ -498,12 +498,12 @@ Get an item from the queue.
 
 <u>Example</u>:
 ```
-var queue = new XRTLibAsync.Promise.PromiseQueue();
+let queue = new XRTLibAsync.Promise.PromiseQueue();
 (async function() {
     console.log(await queue.get());
 })();
 (async function() {
-    for (var i = 1; i <= 5; ++i) {
+    for (let i = 1; i <= 5; ++i) {
         queue.put(i);
         await XRTLibAsync.Asynchronize.Timeout.CreateTimeoutPromise(1000);
     }
@@ -639,12 +639,12 @@ Pop an item asynchronously with receipt mechanism.
 
 <u>Example</u>:
 ```
-var queue = new XRTLibAsync.Promise.PromiseQueue2();
+let queue = new XRTLibAsync.Promise.PromiseQueue2();
 
 async function RunWorker(workerId) {
     while(true) {
-        var receipt = new XRTLibAsync.Promise.PromiseQueue2.Receipt();
-        var task = await queue.popWithReceipt(receipt);
+        let receipt = new XRTLibAsync.Promise.PromiseQueue2.Receipt();
+        let task = await queue.popWithReceipt(receipt);
         if (task === null) {
             console.log("Worker " + workerId.toString() + " ended.");
             receipt.getDeclineSynchronizer().fullfill();  //  Reject the popped item (the item would be unpopped to the queue).
@@ -662,7 +662,7 @@ RunWorker(1);
 RunWorker(2);
 
 //  Add tasks.
-function (var i = 1; i <= 100; ++i) {
+function (let i = 1; i <= 100; ++i) {
     queue.push(i);
 }
 queue.push(null);
@@ -778,7 +778,7 @@ Wait for the condition to be fullfilled.
 <u>Example</u>:
 ```
 //  Tasks context.
-var sync = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
+let sync = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
 
 //  In one task:
 (async function() {
@@ -814,22 +814,22 @@ Wait for the condition to be fullfilled with a cancellable mechanism.
 
 <u>Example</u>:
 ```
-var server = net.createServer();
-var syncServerListened = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
-var syncServerError = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
+let server = net.createServer();
+let syncServerListened = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
+let syncServerError = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
 server.on("listening", function() {
     syncServerListened.fullfill(server.address());
 });
 server.on("error", function(error) {
     syncServerError.fullfill(error);
 });
-var cts = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
-var wh1 = syncServerListened.waitWithCancellator(cts);
-var wh2 = syncServerError.waitWithCancellator(cts);
+let cts = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
+let wh1 = syncServerListened.waitWithCancellator(cts);
+let wh2 = syncServerError.waitWithCancellator(cts);
 server.listen(8080);
-var rsv = await XRTLibAsync.Asynchronize.Preempt.CreatePreemptivePromise([wh1, wh2]);
+let rsv = await XRTLibAsync.Asynchronize.Preempt.CreatePreemptivePromise([wh1, wh2]);
 cts.fullfill();  //  Cancel all pending wait handlers.
-var wh = rsv.getPromiseObject();
+let wh = rsv.getPromiseObject();
 if (wh == wh1) {
     console.log("Server listened!");
     //  Handle connections here.
@@ -1046,11 +1046,11 @@ Acquire the lock.
 <u>Example</u>:
 ```
 //  Tasks context.
-var lock = new XRTLibAsync.Synchronize.Lock.LockSynchronizer();
+let lock = new XRTLibAsync.Synchronize.Lock.LockSynchronizer();
 
 async function RunTask(taskId) {
     //  Acquire the lock.
-    var releaser = await lock.acquire();
+    let releaser = await lock.acquire();
     console.log("Task " + taskId.toString() + " acquired the lock.");
 
     //  Do something...
@@ -1062,7 +1062,7 @@ async function RunTask(taskId) {
 }
 
 //  Create 10 tasks.
-for (var i = 1; i <= 10; ++i) {
+for (let i = 1; i <= 10; ++i) {
     RunTask(i);
 }
 

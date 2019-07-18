@@ -9,28 +9,26 @@
 //
 
 //  Imported modules.
-var XRTLibAsync = require("./../../../");
+const XRTLibAsync = require("./../../../");
 
 //
 //  Main entry.
 //
 (function() {
     //  Create a queue.
-    var queue = new XRTLibAsync.Promise.PromiseQueue();
+    let queue = new XRTLibAsync.Promise.PromiseQueue();
 
     //  Create 5 get request.
-    for (var i = 1; i <= 5; ++i) {
-        (function(_i) {
-            var cancellator = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
-            setTimeout(function() {
-                cancellator.fullfill();
-            }, i * 1000);
-            queue.get(cancellator).then(function(item) {
-                console.log("Operation " + _i.toString() + " finished, text: \"" + item + "\".");
-            }, function() {
-                console.log("Operation " + _i.toString() + " has been cancelled.");
-            });
-        })(i);
+    for (let i = 1; i <= 5; ++i) {
+        let cancellator = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
+        setTimeout(function() {
+            cancellator.fullfill();
+        }, i * 1000);
+        queue.get(cancellator).then(function(item) {
+            console.log("Operation " + i.toString() + " finished, text: \"" + item + "\".");
+        }, function() {
+            console.log("Operation " + i.toString() + " has been cancelled.");
+        });
     }
 
     //  But only put 2 items.

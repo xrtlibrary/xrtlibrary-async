@@ -97,24 +97,22 @@ function PreemptReject(reason, promise) {
  */
 function CreatePreemptivePromise(tasks) {
     return new Promise(function(resolve, reject) {
-        var preempted = false;
-        for (var i = 0; i < tasks.length; ++i) {
-            (function(_i) {
-                var task = tasks[_i];
-                task.then(function(value) {
-                    if (preempted) {
-                        return;
-                    }
-                    preempted = true;
-                    resolve(new PreemptResolve(value, task));
-                }, function(reason) {
-                    if (preempted) {
-                        return;
-                    }
-                    preempted = true;
-                    reject(new PreemptReject(reason, task));
-                });
-            })(i);
+        let preempted = false;
+        for (let i = 0; i < tasks.length; ++i) {
+            let task = tasks[i];
+            task.then(function(value) {
+                if (preempted) {
+                    return;
+                }
+                preempted = true;
+                resolve(new PreemptResolve(value, task));
+            }, function(reason) {
+                if (preempted) {
+                    return;
+                }
+                preempted = true;
+                reject(new PreemptReject(reason, task));
+            });
         }
     });
 }

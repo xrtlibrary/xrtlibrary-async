@@ -9,19 +9,19 @@
 //
 
 //  Imported modules.
-var CrAsyncLoop = require("./../core/asynchronize/loop");
-var CrAsyncPreempt = require("./../core/asynchronize/preempt");
-var CrAsyncTimeout = require("./../core/asynchronize/timeout");
-var CrAsyncWaterfall = require("./../core/asynchronize/waterfall");
-var CrEventWaiter = require("./../core/event/waiter");
-var CrPromiseQueue = require("./../core/promise/queue");
-var CrPromiseQueue2 = require("./../core/promise/queue2");
-var CrPromiseWrapper = require("./../core/promise/wrapper");
-var CrSyncConditional = require("./../core/synchronize/conditional");
-var CrSyncLock = require("./../core/synchronize/lock");
-var CrSyncNotify = require("./../core/synchronize/notify");
-var CrSyncPoll = require("../core/synchronize/poll");
-var CrSyncSemaphore = require("./../core/synchronize/semaphore");
+const CrAsyncLoop = require("./../core/asynchronize/loop");
+const CrAsyncPreempt = require("./../core/asynchronize/preempt");
+const CrAsyncTimeout = require("./../core/asynchronize/timeout");
+const CrAsyncWaterfall = require("./../core/asynchronize/waterfall");
+const CrEventWaiter = require("./../core/event/waiter");
+const CrPromiseQueue = require("./../core/promise/queue");
+const CrPromiseQueue2 = require("./../core/promise/queue2");
+const CrPromiseWrapper = require("./../core/promise/wrapper");
+const CrSyncConditional = require("./../core/synchronize/conditional");
+const CrSyncLock = require("./../core/synchronize/lock");
+const CrSyncNotify = require("./../core/synchronize/notify");
+const CrSyncPoll = require("../core/synchronize/poll");
+const CrSyncSemaphore = require("./../core/synchronize/semaphore");
 
 //  Export public APIs.
 module.exports = {

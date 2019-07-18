@@ -9,14 +9,14 @@
 //
 
 //  Imported modules.
-var XRTLibAsync = require("./../../../");
+const XRTLibAsync = require("./../../../");
 
 //
 //  Main entry.
 //
 (function() {
     //  Create the waterfall.
-    var waterfall = [
+    let waterfall = [
         function() {
             return Promise.resolve();
         },

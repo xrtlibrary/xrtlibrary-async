@@ -32,9 +32,9 @@
  *                      lastest task).
  */
 async function CreateWaterfallPromise(tasks, strictMode) {
-    var lastest = undefined;
-    for (var i = 0; i < tasks.length; ++i) {
-        var task = tasks[i](lastest);
+    let lastest = undefined;
+    for (let i = 0; i < tasks.length; ++i) {
+        let task = tasks[i](lastest);
         if (!strictMode) {
             if (typeof(task) == "undefined" || task === null) {
                 lastest = undefined;

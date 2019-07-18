@@ -9,13 +9,13 @@
 //
 
 //  Imported modules.
-var XRTLibAsync = require("./../../../");
+const XRTLibAsync = require("./../../../");
 
 //
 //  Main entry.
 //
 (function() {
-    var i = 1;
+    let i = 1;
     XRTLibAsync.Asynchronize.Loop.RunAsynchronousForNext(
         function() { return i <= 5; },
         function() { ++i; },

@@ -14,16 +14,16 @@
 //
 
 //  Imported modules.
-var CrAsyncPreempt = require("./../asynchronize/preempt");
-var CrSyncConditional = require("./../synchronize/conditional");
-var XRTLibBugHandler = require("xrtlibrary-bughandler");
-var Events = require("events");
-var Util = require("util");
+const CrAsyncPreempt = require("./../asynchronize/preempt");
+const CrSyncConditional = require("./../synchronize/conditional");
+const XRTLibBugHandler = require("xrtlibrary-bughandler");
+const Events = require("events");
+const Util = require("util");
 
 //  Imported classes.
-var ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
-var EventEmitter = Events.EventEmitter;
-var ReportBug = XRTLibBugHandler.ReportBug;
+const ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
+const EventEmitter = Events.EventEmitter;
+const ReportBug = XRTLibBugHandler.ReportBug;
 
 //
 //  Classes.
@@ -72,8 +72,8 @@ function EventWaiterOperationCancelledError(message) {
  *  @return {Array} - The copied arguments.
  */
 function CopyArguments(args) {
-    var result = [];
-    for (var i = 0; i < args.length; ++i) {
+    let result = [];
+    for (let i = 0; i < args.length; ++i) {
         result.push(args[i]);
     }
     return result;
@@ -109,7 +109,7 @@ async function WaitEvent(
     }
 
     //  Create synchronizers.
-    var syncEvent = new ConditionalSynchronizer();
+    let syncEvent = new ConditionalSynchronizer();
 
     /**
      *  Handle the event.
@@ -122,14 +122,14 @@ async function WaitEvent(
     handler.once(name, _HandleEvent);
 
     //  Wait for signals.
-    var cts = new ConditionalSynchronizer();
-    var wh1 = cancellator.waitWithCancellator(cts);
-    var wh2 = syncEvent.waitWithCancellator(cts);
-    var rsv = await CrAsyncPreempt.CreatePreemptivePromise([wh1, wh2]);
+    let cts = new ConditionalSynchronizer();
+    let wh1 = cancellator.waitWithCancellator(cts);
+    let wh2 = syncEvent.waitWithCancellator(cts);
+    let rsv = await CrAsyncPreempt.CreatePreemptivePromise([wh1, wh2]);
 
     //  Handle different signals.
     cts.fullfill();
-    var wh = rsv.getPromiseObject();
+    let wh = rsv.getPromiseObject();
     if (wh == wh1) {
         handler.removeListener(name, _HandleEvent);
         throw new EventWaiterOperationCancelledError(

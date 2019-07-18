@@ -14,15 +14,15 @@
 //
 
 //  Imported modules.
-var CrAsyncPreempt = require("./preempt");
-var CrSyncConditional = require("./../synchronize/conditional");
-var XRTLibBugHandler = require("xrtlibrary-bughandler");
-var Timers = require("timers");
-var Util = require("util");
+const CrAsyncPreempt = require("./preempt");
+const CrSyncConditional = require("./../synchronize/conditional");
+const XRTLibBugHandler = require("xrtlibrary-bughandler");
+const Timers = require("timers");
+const Util = require("util");
 
 //  Imported classes.
-var ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
-var ReportBug = XRTLibBugHandler.ReportBug;
+const ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
+const ReportBug = XRTLibBugHandler.ReportBug;
 
 //
 //  Classes.
@@ -101,17 +101,17 @@ async function CreateTimeoutPromiseEx(timespan, cancellator, value = null) {
     }
 
     //  Create a timer.
-    var timerSync = new ConditionalSynchronizer();
-    var timer = Timers.setTimeout(function() {
+    let timerSync = new ConditionalSynchronizer();
+    let timer = Timers.setTimeout(function() {
         timer = null;
         timerSync.fullfill();
     }, timespan);
 
     //  Wait for signals.
-    var cts = new ConditionalSynchronizer();
-    var wh1 = timerSync.waitWithCancellator(cts);
-    var wh2 = cancellator.waitWithCancellator(cts);
-    var rsv = await CrAsyncPreempt.CreatePreemptivePromise([wh1, wh2]);
+    let cts = new ConditionalSynchronizer();
+    let wh1 = timerSync.waitWithCancellator(cts);
+    let wh2 = cancellator.waitWithCancellator(cts);
+    let rsv = await CrAsyncPreempt.CreatePreemptivePromise([wh1, wh2]);
 
     //  Handle different signals.
     cts.fullfill();
@@ -120,7 +120,7 @@ async function CreateTimeoutPromiseEx(timespan, cancellator, value = null) {
         Timers.clearTimeout(timer);
         timer = null;
     }
-    var wh = rsv.getPromiseObject();
+    let wh = rsv.getPromiseObject();
     if (wh == wh1) {
         return value;
     } else if (wh == wh2) {

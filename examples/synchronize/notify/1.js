@@ -9,14 +9,14 @@
 //
 
 //  Imported modules.
-var XRTLibAsync = require("./../../../");
+const XRTLibAsync = require("./../../../");
 
 //
 //  Main entry.
 //
 (function() {
     //  Create a notifier.
-    var notifier = new XRTLibAsync.Synchronize.Notify.NotificationSynchronizer();
+    let notifier = new XRTLibAsync.Synchronize.Notify.NotificationSynchronizer();
 
     //  Register a callback.
     notifier.register(function(timestamp, message) {

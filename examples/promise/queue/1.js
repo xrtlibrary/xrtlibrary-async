@@ -9,19 +9,19 @@
 //
 
 //  Imported modules.
-var XRTLibAsync = require("./../../../");
+const XRTLibAsync = require("./../../../");
 
 //
 //  Main entry.
 //
 (function() {
     //  Create a queue.
-    var queue = new XRTLibAsync.Promise.PromiseQueue();
+    let queue = new XRTLibAsync.Promise.PromiseQueue();
 
     //  Read the queue asynchronously.
     (async function() {
         while(true) {
-            var item = await queue.get();
+            let item = await queue.get();
             if (item !== null) {
                 console.log(item);
             } else {
@@ -35,8 +35,8 @@ var XRTLibAsync = require("./../../../");
     });
 
     //  Write 5 numbers to the queue (1 number / second).
-    var current = 1;
-    var timer = setInterval(function() {
+    let current = 1;
+    let timer = setInterval(function() {
         queue.put(current);
         if (current < 5) {
             ++current;

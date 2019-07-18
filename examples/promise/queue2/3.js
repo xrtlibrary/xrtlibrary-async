@@ -9,14 +9,14 @@
 //
 
 //  Imported modules.
-var XRTLibAsync = require("./../../../");
+const XRTLibAsync = require("./../../../");
 
 //
 //  Main entry.
 //
 (function() {
     //  Create a queue.
-    var queue = new XRTLibAsync.Promise.PromiseQueue2();
+    let queue = new XRTLibAsync.Promise.PromiseQueue2();
 
     //  Bind queue events.
     queue.on("change", function(type, item) {
@@ -35,7 +35,7 @@ var XRTLibAsync = require("./../../../");
     (async function() {
         while(true) {
             await XRTLibAsync.Asynchronize.Timeout.CreateTimeoutPromise(1000);
-            var item = await queue.pop();
+            let item = await queue.pop();
             if (item !== null) {
                 console.log(item);
             } else {
@@ -49,7 +49,7 @@ var XRTLibAsync = require("./../../../");
     });
 
     //  Write 5 numbers to the queue.
-    for (var i = 1; i <= 5; ++i) {
+    for (let i = 1; i <= 5; ++i) {
         queue.push(i);
     }
     queue.push(null);

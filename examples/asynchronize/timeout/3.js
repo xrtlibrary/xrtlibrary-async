@@ -9,13 +9,13 @@
 //
 
 //  Imported modules.
-var XRTLibAsync = require("./../../../");
+const XRTLibAsync = require("./../../../");
 
 //
 //  Main entry.
 //
 (function() {
-    var cancellator = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
+    let cancellator = new XRTLibAsync.Synchronize.Conditional.ConditionalSynchronizer();
 
     XRTLibAsync.Asynchronize.Timeout.CreateTimeoutPromiseEx(5000, cancellator).then(function() {
         //  Never goes here.

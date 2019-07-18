@@ -9,23 +9,21 @@
 //
 
 //  Imported modules.
-var XRTLibAsync = require("./../../../");
+const XRTLibAsync = require("./../../../");
 
 //
 //  Main entry.
 //
-(function() {
+(async function() {
     //  Create a lock.
-    var lock = new XRTLibAsync.Synchronize.Lock.LockSynchronizer();
+    let lock = new XRTLibAsync.Synchronize.Lock.LockSynchronizer();
 
     //  See the acquiring order.
-    for (var i = 1; i <= 10; ++i) {
-        (async function(_i) {
-            var releaser = await lock.acquire();
-            console.log(_i.toString() + " acquired.");
-            await XRTLibAsync.Asynchronize.Timeout.CreateTimeoutPromise(500);
-            console.log(_i.toString() + " released.");
-            releaser.fullfill();
-        })(i);
+    for (let i = 1; i <= 10; ++i) {
+        let releaser = await lock.acquire();
+        console.log(i.toString() + " acquired.");
+        await XRTLibAsync.Asynchronize.Timeout.CreateTimeoutPromise(500);
+        console.log(i.toString() + " released.");
+        releaser.fullfill();
     }
 })();

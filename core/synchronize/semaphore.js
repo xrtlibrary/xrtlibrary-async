@@ -14,27 +14,27 @@
 //
 
 //  Imported modules.
-var CrAsyncPreempt = require("./../asynchronize/preempt");
-var CrPromiseQueue2 = require("./../promise/queue2");
-var CrPromiseWrapper = require("./../promise/wrapper");
-var CrSyncConditional = require("./../synchronize/conditional");
-var XRTLibBugHandler = require("xrtlibrary-bughandler");
-var Util = require("util");
+const CrAsyncPreempt = require("./../asynchronize/preempt");
+const CrPromiseQueue2 = require("./../promise/queue2");
+const CrPromiseWrapper = require("./../promise/wrapper");
+const CrSyncConditional = require("./../synchronize/conditional");
+const XRTLibBugHandler = require("xrtlibrary-bughandler");
+const Util = require("util");
 
 //  Imported classes.
-var PromiseQueue2 = CrPromiseQueue2.PromiseQueue;
-var PromiseWrapper = CrPromiseWrapper.PromiseWrapper;
-var ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
-var ReportBug = XRTLibBugHandler.ReportBug;
+const PromiseQueue2 = CrPromiseQueue2.PromiseQueue;
+const PromiseWrapper = CrPromiseWrapper.PromiseWrapper;
+const ConditionalSynchronizer = CrSyncConditional.ConditionalSynchronizer;
+const ReportBug = XRTLibBugHandler.ReportBug;
 
 //
 //  Constants.
 //
 
 //  Semaphore states.
-var SEMSTATE_AWAIT = 0;
-var SEMSTATE_FREE = 1;
-var SEMSTATE_COUNT = 2;
+const SEMSTATE_AWAIT = 0;
+const SEMSTATE_FREE = 1;
+const SEMSTATE_COUNT = 2;
 
 //
 //  Classes.
@@ -84,7 +84,7 @@ function SemaphoreWaitContext(pw, cancellator) {
     //
 
     //  Managed flag.
-    var managed = false;
+    let managed = false;
 
     //
     //  Public methods.
@@ -151,13 +151,13 @@ function SemaphoreSynchronizer(initialCount) {
      * 
      *  @type {SemaphoreSynchronizer}
      */
-    var self = this;
+    let self = this;
 
     //  Internal counter.
-    var counter = initialCount;
+    let counter = initialCount;
 
     //  Semaphore state.
-    var state = new CrSyncConditional.MultiConditionalSynchronzier(
+    let state = new CrSyncConditional.MultiConditionalSynchronzier(
         SEMSTATE_COUNT, 
         SEMSTATE_FREE
     );
@@ -167,7 +167,7 @@ function SemaphoreSynchronizer(initialCount) {
      * 
      *  @type {PromiseQueue2<SemaphoreWaitContext>}
      */
-    var queue = new PromiseQueue2();
+    let queue = new PromiseQueue2();
 
     //
     //  Public methods.
@@ -195,8 +195,8 @@ function SemaphoreSynchronizer(initialCount) {
             );
         }
         return new Promise(function(resolve, reject) {
-            var cts = new CrSyncConditional.ConditionalSynchronizer();
-            var ctx = new SemaphoreWaitContext(
+            let cts = new CrSyncConditional.ConditionalSynchronizer();
+            let ctx = new SemaphoreWaitContext(
                 new PromiseWrapper(
                     function(value) {
                         cts.fullfill();
@@ -271,10 +271,10 @@ function SemaphoreSynchronizer(initialCount) {
             /**
              *  @type {SemaphoreWaitContext}
              */
-            var ctx = await queue.pop();
+            let ctx = await queue.pop();
 
             //  Get the cancellator of the wait context.
-            var cancellator = ctx.getCancellator();
+            let cancellator = ctx.getCancellator();
 
             //  Ignore this context if it was cancelled.
             if (cancellator.isFullfilled()) {
@@ -289,17 +289,17 @@ function SemaphoreSynchronizer(initialCount) {
                 state.switch(SEMSTATE_AWAIT);
 
                 //  Wait for signals.
-                var cts = new ConditionalSynchronizer();
-                var wh1 = state.waitWithCancellator(SEMSTATE_FREE, cts);
-                var wh2 = cancellator.waitWithCancellator(cts);
-                var rsv = await CrAsyncPreempt.CreatePreemptivePromise([
+                let cts = new ConditionalSynchronizer();
+                let wh1 = state.waitWithCancellator(SEMSTATE_FREE, cts);
+                let wh2 = cancellator.waitWithCancellator(cts);
+                let rsv = await CrAsyncPreempt.CreatePreemptivePromise([
                     wh1, 
                     wh2
                 ]);
 
                 //  Handle different signals
                 cts.fullfill();
-                var wh = rsv.getPromiseObject();
+                let wh = rsv.getPromiseObject();
                 if (wh == wh1) {
                     ctx.getPromiseWrapper().getResolveFunction().call(this);
                 } else if (wh == wh2) {
