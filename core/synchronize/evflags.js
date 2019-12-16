@@ -114,15 +114,12 @@ function EventFlags(initialValue = 0) {
     //
 
     /**
-     *  Current flag value.
+     *  Get/set current flag value.
      * 
-     *  Exception(s):
-     *    [1] EventFlagsInvalidOperationError: 
-     *        Assign value to this property.
-     * 
+     *  @throws {EventFlagsParameterError}
+     *      - The new value is invalid.
      *  @name EventFlags#value
      *  @type {Number}
-     *  @readonly
      */
     Object.defineProperty(
         self,
@@ -131,10 +128,12 @@ function EventFlags(initialValue = 0) {
             get: function() {
                 return currentValue;
             },
-            set: function() {
-                throw new EventFlagsInvalidOperationError(
-                    "The \"value\" property is readonly."
-                );
+            set: function(nvalue) {
+                if (!_IsValidFlagValue(nvalue)) {
+                    throw new EventFlagsParameterError("Invalid value.");
+                }
+                currentValue = nvalue;
+                _TriggerAll();
             }
         }
     );
@@ -142,6 +141,15 @@ function EventFlags(initialValue = 0) {
     //
     //  Private methods.
     //
+
+    /**
+     *  Execute all triggers.
+     */
+    function _TriggerAll() {
+        waitSet.forEach(function(cb) {
+            cb();
+        });
+    }
 
     /**
      *  Check whether a flag value is valid.
@@ -384,9 +392,7 @@ function EventFlags(initialValue = 0) {
         }
 
         //  Execute all triggers.
-        waitSet.forEach(function(cb) {
-            cb();
-        });
+        _TriggerAll();
     };
 }
 

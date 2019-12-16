@@ -1027,12 +1027,12 @@ Construct a new object.
 <u>Parameter(s)</u>:
  - initialValue (*Number*): (Optional) The initial flag value.
 
-##### (Property) value (readonly)
+##### (Property) value (read/write)
 
-Current flag value.
+Get/set current flag value.
 
 <u>Exception(s)</u>:
- - *EventFlagsParameterError*: Assign value to this property.
+ - *EventFlagsParameterError*: The new value is invalid.
 
 ##### evflags.pend(flags, opt, [cancellator])
 
