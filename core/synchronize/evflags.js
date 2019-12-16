@@ -52,18 +52,17 @@ function EventFlagsParameterError(message = "") {
     EventFlagsError.call(this, message);
 }
 
-/**
- *  Event flags invalid operation error.
- * 
- *  @constructor
- *  @extends {EventFlagsError}
- *  @param {String} [message] - The message.
- */
-function EventFlagsInvalidOperationError(message = "") {
-    //  Let parent class initialize.
-    EventFlagsError.call(this, message);
-}
-
+// /**
+//  *  Event flags invalid operation error.
+//  * 
+//  *  @constructor
+//  *  @extends {EventFlagsError}
+//  *  @param {String} [message] - The message.
+//  */
+// function EventFlagsInvalidOperationError(message = "") {
+//     //  Let parent class initialize.
+//     EventFlagsError.call(this, message);
+// }
 
 /**
  *  Event flags operation cancelled error.
@@ -399,7 +398,7 @@ function EventFlags(initialValue = 0) {
 //  Error classes.
 EventFlags.Error = EventFlagsError;
 EventFlags.ParameterError = EventFlagsParameterError;
-EventFlags.InvalidOperationError = EventFlagsInvalidOperationError;
+// EventFlags.InvalidOperationError = EventFlagsInvalidOperationError;
 EventFlags.OperationCancelledError = EventFlagsOperationCancelledError;
 
 //  Constants.
@@ -416,7 +415,7 @@ EventFlags.POST_FLAG_SET = 2;
 //
 Util.inherits(EventFlagsError, Error);
 Util.inherits(EventFlagsParameterError, EventFlagsError);
-Util.inherits(EventFlagsInvalidOperationError, EventFlagsError);
+// Util.inherits(EventFlagsInvalidOperationError, EventFlagsError);
 Util.inherits(EventFlagsOperationCancelledError, EventFlagsError);
 
 //  Export public APIs.
