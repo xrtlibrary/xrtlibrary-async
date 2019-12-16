@@ -18,6 +18,7 @@ const CrPromiseQueue = require("./../core/promise/queue");
 const CrPromiseQueue2 = require("./../core/promise/queue2");
 const CrPromiseWrapper = require("./../core/promise/wrapper");
 const CrSyncConditional = require("./../core/synchronize/conditional");
+const CrSyncEvFlags = require("./../core/synchronize/evflags");
 const CrSyncLock = require("./../core/synchronize/lock");
 const CrSyncNotify = require("./../core/synchronize/notify");
 const CrSyncPoll = require("../core/synchronize/poll");
@@ -63,6 +64,9 @@ module.exports = {
             "ConditionalSynchronizer": CrSyncConditional.ConditionalSynchronizer,
             "AutomateUnlockConditionalSynchronizer": CrSyncConditional.AutomateUnlockConditionalSynchronizer,
             "MultiConditionalSynchronzier": CrSyncConditional.MultiConditionalSynchronzier
+        },
+        "Event": {
+            "EventFlags": CrSyncEvFlags.EventFlags
         },
         "Lock": {
             "LockSynchronizer": CrSyncLock.LockSynchronizer
