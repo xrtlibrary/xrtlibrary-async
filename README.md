@@ -462,7 +462,7 @@ Get the resolve function.
 Promise queue.
 
 <u>Extend(s)</u>:
- - EventEmitter
+ - *EventEmitter*
 
 ##### (Event) 'change'
 
@@ -571,7 +571,7 @@ Promise queue invalid operation error.
 Promise queue (version 2).
 
 <u>Extend(s)</u>:
- - EventEmitter
+ - *EventEmitter*
 
 ##### (Constant) PromiseQueue2.CHANGETYPE_PUSH
 
@@ -722,14 +722,14 @@ Get the receipt acknowledge.
 Promise queue error.
 
 <u>Extend(s)</u>:
- - Error
+ - *Error*
 
 #### (Class) PromiseQueue2.OperationCancelledError
 
 Promise queue operation cancelled error.
 
 <u>Extend(s)</u>:
- - PromiseQueue2.Error
+ - *PromiseQueue2.Error*
 
 ### (Module) Synchronize.Conditional
 
@@ -1022,7 +1022,7 @@ Event flags.
 Construct a new object.
 
 <u>Exception(s)</u>:
- - *EventFlagsParameterError*: The initial value is invalid.
+ - *EventFlags.ParameterError*: The initial value is invalid.
 
 <u>Parameter(s)</u>:
  - initialValue (*Number*): (Optional) The initial flag value.
@@ -1032,7 +1032,7 @@ Construct a new object.
 Get/set current flag value.
 
 <u>Exception(s)</u>:
- - *EventFlagsParameterError*: The new value is invalid.
+ - *EventFlags.ParameterError*: The new value is invalid.
 
 ##### evflags.pend(flags, opt, [cancellator])
 
@@ -1042,10 +1042,10 @@ Wait for a combination of conditions or events (i.e. bits) to be set (or cleared
  - The application can wait for any condition to be set or cleared, for all conditions to be set or cleared. If the events that the caller desires are not available, the caller is blocked until the desired conditions or events are satisfied or the cancellator was activated.
 
 <u>Exception(s)</u>:
- - *EventFlagsParameterError*: One of following error occurred:
+ - *EventFlags.ParameterError*: One of following error occurred:
    - '*flags*' is not an unsigned 32-bit integer.
    - '*opt*' contains invalid option (or combination of options).
- - *EventFlagsOperationCancelledError*: The cancellator was activated.
+ - *EventFlags.OperationCancelledError*: The cancellator was activated.
 
 <u>Parameter(s)</u>:
  - flags (*Number*): A bit pattern indicating which bit(s) (i.e., flags) to check. The bits wanted are specified by setting the corresponding bits in *flags*. If the application wants to wait for bits 0 and 1 to be set, specify 0x03. The same applies if you'd want to wait for the same 2 bits to be cleared (you'd still specify which bits by passing 0x03).
@@ -1071,13 +1071,34 @@ Set or clear event flag bits.
  - The bits set or cleared are specified in a bit mask (i.e., the flags parameter). The caller can set or clear bits that are already set or cleared.
 
 <u>Exception(s)</u>:
- - One of following error occurred:
+ - *EventFlags.ParameterError*: One of following error occurred:
    - '*flags*' is not an unsigned 32-bit integer.
    - '*opt*' contains invalid option (or combination of options).
 
 <u>Parameter(s)</u>:
  - flags (*Number*): An integer that specifies which bits to be set or cleared. If *opt* is *EventFlags.POST_FLAG_SET*, each bit that is set in flags will set the corresponding bit in the event flag group. For example to set bits 0, 4 and 5, you would set flags to 0x31 (note that bit 0 is the least significant bit). If *opt* is *EventFlags.POST_FLAG_CLR*, each bit that is set in flags will clear the corresponding bit in the event flag group. For example to clear bits 0, 4, and 5, you would specify flags as 0x31 (again, bit 0 is the least significant bit).
  - An integer that indicates whether the flags are set (*EventFlags.POST_FLAG_SET*) or cleared (*EventFlags.POST_FLAG_CLR*).
+
+#### (Class) EventFlags.Error
+
+Event flags error.
+
+<u>Extend(s)</u>:
+ - *Error*
+
+#### (Class) EventFlags.ParameterError
+
+Event flags parameter error.
+
+<u>Extend(s)</u>:
+ - *EventFlags.Error*
+
+#### (Class) EventFlags.OperationCancelledError
+
+Event flags operation cancelled error.
+
+<u>Extend(s)</u>:
+ - *EventFlags.Error*
 
 ### (Module) Synchronize.Lock
 
