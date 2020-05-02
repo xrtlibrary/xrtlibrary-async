@@ -186,12 +186,12 @@ function PromiseQueue() {
     this.put = function(item) {
         while(waiting.length != 0) {
             let context = waiting.shift();
-            context.markAsManaged();
             let pw = context.getPromiseWrapper();
             let cancellator = context.getCancellator();
             if (cancellator.isFullfilled()) {
                 continue;
             }
+            context.markAsManaged();
             pw.getResolveFunction().call(this, item);
             return;
         }
