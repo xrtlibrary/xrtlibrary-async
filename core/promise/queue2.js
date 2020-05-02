@@ -470,14 +470,14 @@ function PromiseQueue() {
             }
             let popContext = _QueuePopContext_Pop();
 
-            //  Mark the pop context as managed.
-            popContext.markAsManaged();
-
             //  Check the cancellator.
             let popContextCancellator = popContext.getCancellator();
             if (popContextCancellator.isFullfilled()) {
                 continue;
             }
+
+            //  Mark the pop context as managed.
+            popContext.markAsManaged();
 
             //  Get the promise wrapper.
             let popContextPW = popContext.getPromiseWrapper();
