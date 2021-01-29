@@ -287,6 +287,22 @@ if (p == p1) {
 <u>Introduction</u>:
 This module implements asynchronous delay functions.
 
+#### (Constant) SLIMTIMEOUT_STATUS_{AWAIT, CANCELLED, TIMEOUTED}
+
+Slim timeout wait handle status.
+
+#### (Type) TSlimTimeoutWaitHandle : Object
+
+Slim timeout wait handle.
+
+<u>Properties</u>:
+  - status (*Number*): Current status:
+    - *SLIMTIMEOUT_STATUS_AWAIT*: Waiting for the timeout timer to be expired.
+    - *SLIMTIMEOUT_STATUS_TIMEOUTED*: The timeout timer expired.
+    - *SLIMTIMEOUT_STATUS_CANCELLED*: Cancelled before the timeout timer expires.
+  - handle (*Promise&lt;TSlimTimeoutWaitHandle&gt;*): The wait handle (a promise object that resolves with this wait handle when it leaves *SLIMTIMEOUT_STATUS_AWAIT* status).
+  - cancel (*() =&gt; void*): The cancellator function.
+
 #### (Class) TimeoutPromiseError
 
 Timeout promise error.
@@ -355,6 +371,16 @@ setTimeout(function() {
 //  Output:
 //    Timeout timer has been cancelled.  (1000ms after startup)
 ```
+
+#### WaitTimeoutSlim(timespan)
+
+Wait for timeout.
+
+<u>Parameter(s)</u>:
+  - timespan (*Number*): The timeout (unit: milliseconds).
+
+<u>Return value</u>:
+  - (*TSlimTimeoutWaitHandle*) The slim timeout wait handle.
 
 ### (Module) Event
 
@@ -1011,7 +1037,71 @@ Mark the condition as fullfilled.
 <u>Parameter(s)</u>:
  - data (*T*): The data (default = null).
 
+### (Module) Synchronize.Completion
+
+#### (Type) TSlimCompletionWaitHandle : Object
+
+Slim completion source wait handle.
+
+<u>Properties</u>:
+  - status (*Number*): Current status:
+    - *SlimCompletion.STATUS_AWAIT*: Waiting for completion enters completed status.
+    - *SlimCompletion.STATUS_COMPLETED*: Completion enters completed status.
+    - *SlimCompletion.STATUS_CANCELLED*: Cancelled before the completion enters completed status.
+  - handle (*Promise&lt;TSlimCompletionWaitHandle&gt;*): The wait handle (a promise object that resolves with this wait handle when it leaves *SlimCompletion.STATUS_AWAIT* status).
+  - cancel (*() =&gt; void*): The cancellator function.
+
+#### (Class) SlimCompletion
+
+Slim completion source.
+
+##### SlimCompletion.STATUS_{AWAIT, COMPLETED, CANCELLED}
+
+Slim completion source wait handle status.
+
+##### new SlimCompletion()
+
+Construct a new object.
+
+##### cp.wait([nonblock = false])
+
+Wait for the completion enters completed status.
+
+<u>Parameter(s)</u>:
+  - nonblock (*Boolean*): True if non-block mode is on.
+
+<u>Return value</u>:
+  - (*?TSlimCompletionWaitHandle*) The wait handle (NULL if non-block mode is on and the completion is not in completed status yet).
+
+##### cp.complete()
+
+Enter completed status.
+
+##### SlimCompletion.WaitCondition(cond, [nonblock = false])
+
+Wait for condition.
+
+<u>Parameter(s)</u>:
+  - cond (*ConditionalSynchronizer*): The conditional synchronizer.
+  - nonblock (*Boolean*): True if non-block mode is on.
+
+<u>Return value</u>:
+  - (*?TSlimCompletionWaitHandle*) The wait handle (NULL if non-block mode is on and the conditional synchronizer is not fullfilled yet).
+
 ### (Module) Synchronize.Event
+
+#### (Type) TSlimEventFlagsWaitHandle : Object
+
+Slim event flags wait handle.
+
+<u>Properties</u>:
+  - status (*Number*): Current status:
+    - *SlimEventFlags.STATUS_AWAIT*: Wait for specified condition satisfies.
+    - *SlimEventFlags.STATUS_SATISFIED*: The wait condition has been satisfied.
+    - *SlimEventFlags.STATUS_CANCELLED*: Cancelled before the wait condition satisfies.
+  - value (*Number*): The flag value at the time that the wait condition satisfies.
+  - handle (*Promise&lt;TSlimEventFlagsWaitHandle&gt;): The wait handle (a promise object that resolves with this wait handle when it leaves *SlimEventFlags.STATUS_AWAIT* status).
+  - cancel (*() =&gt; void*): The cancellator function.
 
 #### (Class) EventFlags
 
@@ -1099,6 +1189,90 @@ Event flags operation cancelled error.
 
 <u>Extend(s)</u>:
  - *EventFlags.Error*
+
+#### (Class) SlimEventFlags
+
+Slim event flags.
+
+##### SlimEventFlags.STATUS_{AWAIT, SATISFIED, CANCELLED}
+
+Slim event flags wait handle status.
+
+##### new SlimEventFlags([initialValue = 0x00000000])
+
+Construct a new object.
+
+<u>Note(s)</u>:
+  - The initial flag value shall be an unsigned 32-bit integer.
+    - 0x00000000 would be used as the initial flag value if specified initial flag value is not an integer or is a negative integer.
+    - 0xFFFFFFFF would be used as the initial flag value if specified initial flag value is greater than 0xFFFFFFFF.
+
+<u>Parameter(s)</u>:
+  - initialValue (*Number*): The initial flag value.
+
+##### sef.wait(onebits, [zerobits = 0x00000000], [nonblock = false])
+
+Wait for specified condition satisfies.
+
+<u>Note(s)</u>:
+  - The condition indicated by following formula is monitored:
+    - ((*flag* & *onebits*) == *onebits*) && ((*flag* & *zerobits*) == 0)
+  - Both "*onebits*" and "*zerobits*" parameters are assumed to be unsigned 32-bit integers.
+    No additional parameter validity check would be performed on both parameters for performance reason. Behavior is undefined when any of both is not an unsigned 32-bit integer.
+
+<u>Parameter(s)</u>
+  - onebits (*Number*): An unsigned 32-bit integer that indicates which bits of the flag should be 1.
+  - zerobits (*Number*): An unsigned 32-bit integer that indicates which bits of the flag should be 0.
+  - nonblock (*Boolean*): True if non-block mode is on.
+
+<u>Return value</u>:
+  - (*?TSlimEventFlagsWaitHandle*) The wait handle (NULL if non-block mode is on and the condition is not satisfied yet).
+
+##### sef.customWait(chk, [nonblock = false])
+
+Wait for custom condition satisfies.
+
+<u>Parameter(s)</u>:
+  - chk (*(flag: Number) =&gt; Boolean*): The custom condition satisfication checker function.
+    - This function shall return true if the flag value satisfies the condition.
+    - This function shall return false otherwise.
+  - nonblock (*Boolean*): True if non-block mode is on.
+
+<u>Return value</u>:
+  - (*?TSlimEventFlagsWaitHandle*) The wait handle (NULL if non-block mode is on and the condition is not satisfied yet).
+
+##### sef.current()
+
+Get current flag value.
+
+<u>Return value</u>:
+  - (*Number*) The flag value.
+
+##### sef.modify(orbits, [andbits = 0xFFFFFFFF], [xorbits = 0x00000000])
+
+Modify the flag value.
+
+<u>Note(s)</u>:
+  - New flag value is calculated according to following formula:
+    - *flag* = (((*flag* | *orbits*) & *andbits*) ^ *xorbits*)
+  - "*orbits*", "*andbits*" and "*xorbits*" parameters must be unsigned 32-bit integer.
+    No additional parameter validity check would be performed on these parameters for performance reason. Behavior is undefined when any of these parameters is not an unsigned 32-bit integer.
+
+<u>Parameter(s)</u>:
+  - orbits (*Number*): The ORing bits.
+  - andbits (*Number*): The ANDing bits.
+  - xorbits (*Number*): The XORing bits.
+
+##### sef.assign(u32new)
+
+Assign the flag value.
+
+<u>Note(s)</u>:
+  - The new flag value must be an unsigned 32-bit integer.
+    Behavior is undefined when the new flag value is not an unsigned 32-bit integer.
+
+<u>Parameter(s)</u>:
+  - u32new (*Number*): The new flag value.
 
 ### (Module) Synchronize.Lock
 
@@ -1322,4 +1496,47 @@ Get whether there is a P() operation waiting for signal now.
 
 <u>Return value</u>:
  - (*Boolean*) True if so.
+
+#### (Class) SlimSemaphoreSynchronizer
+
+Slim semaphore synchronizer.
+
+##### SlimSemaphoreSynchronizer.STATUS_{AWAIT, ENTERED, CANCELLED}
+
+Slim semaphore synchronizer wait handle status.
+
+##### new SlimSemaphoreSynchronizer([initialTokens = 0])
+
+Construct a new object.
+
+<u>Note(s)</u>:
+  - The initial token count must be a non-negative integer or *Infinity*.
+    - If the initial token count is less than 0, it would be set to 0.
+    - If the initial token count is NaN, it would be set to 0.
+    - If the initial token count is a finite non-integer number, it would be floored to the nearest integer that is less than it.
+    - If the initial token count is not a Number object, if would be set to 0.
+
+<u>Parameter(s)</u>:
+  - initialTokens (*Number*): The initial token count.
+
+##### ssem.wait([nonblock = false])
+
+Wait for entering the semaphore.
+
+<u>Parameter(s)</u>:
+  - nonblock (*Boolean*): True if non-block mode is on.
+
+<u>Return value</u>:
+  - (*?TSlimSemaphoreWaitHandle*) The wait handle (NULL if non-block mode is on and unable to enter the semaphore without blocking).
+
+##### ssem.signal()
+
+Release the semaphore.
+
+##### ssem.forever()
+
+Release the semaphore forever.
+
+<u>Note(s)</u>:
+  - Release the semaphore forever means that all threads (coroutines) that are currently waiting for entering the semaphore would be granted to enter the semaphore. All future requests to enter the semaphore would also be granted to enter the semaphore immediately without blocking.
 
